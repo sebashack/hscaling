@@ -1,0 +1,12 @@
+syntax = "proto3";
+package monitor;
+
+service MonitorService {
+  rpc GetHeartbeat (HeartbeatRequest) returns (HeartbeatOkResponse) {}
+}
+
+message HeartbeatRequest {}
+
+message HeartbeatOkResponse {
+  string response = 1;
+}
