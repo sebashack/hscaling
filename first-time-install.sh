@@ -12,3 +12,6 @@ if [[ -x "$(command -v stack)" ]]; then
 else
     curl -sSL https://get.haskellstack.org/ | sh
 fi
+
+# Code formatter
+stack install fourmolu
