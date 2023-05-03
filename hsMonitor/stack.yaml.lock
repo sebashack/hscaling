@@ -3,11 +3,57 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    commit: c6d91e58f2ef7a2a78016ba5590a7c90cf235740
+    git: git@github.com:awakesecurity/gRPC-haskell.git
+    name: grpc-haskell
+    pantry-tree:
+      sha256: 7a34a30e33d9935bea330d626b0992a59f44ed623be65c8c414313285a874001
+      size: 7350
+    subdir: .
+    version: 0.3.0
+  original:
+    commit: c6d91e58f2ef7a2a78016ba5590a7c90cf235740
+    git: git@github.com:awakesecurity/gRPC-haskell.git
+    subdir: .
+- completed:
+    commit: c6d91e58f2ef7a2a78016ba5590a7c90cf235740
+    git: git@github.com:awakesecurity/gRPC-haskell.git
+    name: grpc-haskell-core
+    pantry-tree:
+      sha256: 21eb340cdb7a0504c470c838d905bd99bc58f05b7a5f788c9c5ab444eb937a57
+      size: 2578
+    subdir: core
+    version: 0.3.0
+  original:
+    commit: c6d91e58f2ef7a2a78016ba5590a7c90cf235740
+    git: git@github.com:awakesecurity/gRPC-haskell.git
+    subdir: core
+- completed:
+    hackage: proto3-suite-0.5.1@sha256:045994919b105b89c44e3ae94f50258b86a6ebfd14425845e13e0921d2e8610e,7015
+    pantry-tree:
+      sha256: 7387c16e46bdcbcfdfc87b42a1dfd17bf6f7168a50b409469d993f7f73a6f133
+      size: 3402
+  original:
+    hackage: proto3-suite-0.5.1
+- completed:
+    hackage: proto3-wire-1.4.0@sha256:f8f9facfe86151c7172fc796e1d33b2be54aa919c0a17d39d21b33e928ee66a4,3082
+    pantry-tree:
+      sha256: b834fa8c413a6c67cc76cf42725199f5154a03aaf0e2f144c4a284347c8d3b10
+      size: 1017
+  original:
+    hackage: proto3-wire-1.4.0
+- completed:
+    hackage: word-compat-0.0.6@sha256:d732734492d91a0a2007154339ed8ed02d2c094340cee4af53db265d593f3fb2,1427
+    pantry-tree:
+      sha256: 182dc64fa0d1fc8eb235b26ae7f8801c848f8256b058e95518cd69fbcb739c38
+      size: 355
+  original:
+    hackage: word-compat-0.0.6
 snapshots:
 - completed:
-    sha256: 42f77c84b34f68c30c2cd0bf8c349f617a0f428264362426290847a6a2019b64
-    size: 649618
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/19.yaml
-  original:
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/19.yaml
+    sha256: 428ec8d5ce932190d3cbe266b9eb3c175cd81e984babf876b64019e2cbe4ea68
+    size: 590100
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/28.yaml
+  original: lts-18.28

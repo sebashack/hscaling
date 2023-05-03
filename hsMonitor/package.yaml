@@ -35,6 +35,8 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - grpc-haskell
 
 executables:
   hsMonitor-exe:

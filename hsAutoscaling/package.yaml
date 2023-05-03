@@ -35,6 +35,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - grpc-haskell
+  - grpc-haskell-core
 
 executables:
   hsAutoscaling-exe:
