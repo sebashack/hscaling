@@ -2,9 +2,9 @@ name:                hsMonitor
 version:             0.1.0.0
 github:              "githubuser/hsMonitor"
 license:             BSD3
-author:              "Author name here"
+author:              "Sebastian Pulido"
 maintainer:          "example@example.com"
-copyright:           "2023 Author name here"
+copyright:           "2023 Sebastian Pulido"
 
 extra-source-files:
 - README.md
