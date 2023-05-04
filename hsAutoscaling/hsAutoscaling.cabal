@@ -9,9 +9,9 @@ version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/hsAutoscaling#readme>
 homepage:       https://github.com/githubuser/hsAutoscaling#readme
 bug-reports:    https://github.com/githubuser/hsAutoscaling/issues
-author:         Author name here
+author:         Sebastian Pulido
 maintainer:     example@example.com
-copyright:      2023 Author name here
+copyright:      2023 Sebastian Pulido
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
