@@ -36,7 +36,14 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
+  - bytestring
+  - containers
+  - deepseq
   - grpc-haskell
+  - proto3-suite
+  - proto3-wire
+  - text
+  - vector
 
 executables:
   hsMonitor-exe:

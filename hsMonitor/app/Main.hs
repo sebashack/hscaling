@@ -1,6 +1,8 @@
 module Main (main) where
 
-import Lib
+import Grpc.Server (runServer)
 
 main :: IO ()
-main = someFunc
+main = do
+    putStrLn "Running on 127.0.0.1:50001"
+    runServer "127.0.0.1" 50001

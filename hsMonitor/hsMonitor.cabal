@@ -9,9 +9,9 @@ version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/hsMonitor#readme>
 homepage:       https://github.com/githubuser/hsMonitor#readme
 bug-reports:    https://github.com/githubuser/hsMonitor/issues
-author:         Author name here
+author:         Sebastian Pulido
 maintainer:     example@example.com
-copyright:      2023 Author name here
+copyright:      2023 Sebastian Pulido
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -25,7 +25,8 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Grpc.Protobuf.Monitor
+      Grpc.Server
   other-modules:
       Paths_hsMonitor
   hs-source-dirs:
@@ -33,7 +34,14 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , containers
+    , deepseq
     , grpc-haskell
+    , proto3-suite
+    , proto3-wire
+    , text
+    , vector
   default-language: Haskell2010
 
 executable hsMonitor-exe
