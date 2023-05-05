@@ -1,11 +1,36 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Env (Opts (..), Env (..), mkEnv) where
+module AutoScalingGroup.Env (
+    ASGAction,
+    ASGActionE,
+    Env (..),
+    Opts (..),
+    actionE,
+    logErrText,
+    logText,
+    mkEnv,
+    runASGAction
+) where
 
 import Control.Concurrent (MVar, newMVar)
 import Control.Lens.Setter (set)
+import Control.Monad.Base (MonadBase)
+import Control.Monad.Catch (
+    MonadCatch,
+    MonadThrow,
+ )
+import Control.Monad.Except (
+    ExceptT (..),
+    MonadError (..),
+    runExceptT,
+ )
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Reader (MonadReader, asks)
 import Control.Monad.Trans.AWS (
     LogLevel (..),
     Logger,
@@ -13,10 +38,9 @@ import Control.Monad.Trans.AWS (
     envLogger,
     envRegion,
  )
-import Data.Aeson (
-    FromJSON (..),
-    withText,
- )
+import Control.Monad.Trans.Control (MonadBaseControl)
+import Control.Monad.Trans.Reader (ReaderT, runReaderT)
+import Data.Aeson (FromJSON (..), withText)
 import Data.ByteString.Builder (toLazyByteString)
 import Data.Set as Set
 import Data.Text (Text)
@@ -59,14 +83,42 @@ data Env = Env
     { awsEnv :: AWS.Env
     , monitors :: MVar (Set Text)
     , appLogger :: TL.Logger
+    , appLogLevel :: TL.Level
     }
+
+type ASGAction = ReaderT Env IO
+
+newtype ASGActionE a = ASGActionE
+    { unASGActionE :: ExceptT Text ASGAction a
+    }
+    deriving
+        ( Functor
+        , Applicative
+        , Monad
+        , MonadIO
+        , MonadReader Env
+        , MonadBase IO
+        , MonadBaseControl IO
+        , MonadThrow
+        , MonadCatch
+        , MonadError Text
+        )
+
+runASGAction :: ASGAction a -> Env -> IO a
+runASGAction = runReaderT
 
 mkEnv :: Opts -> IO Env
 mkEnv opts = do
     logger <- mkLogger $ logLevel opts
     env <- mkAWSEnv (awsOpts opts) (TL.clone (Just "aws_logger") logger)
     monitorsVar <- newMVar Set.empty
-    return Env{awsEnv = env, appLogger = logger, monitors = monitorsVar}
+    return
+        Env
+            { awsEnv = env
+            , appLogger = logger
+            , appLogLevel = logLevel opts
+            , monitors = monitorsVar
+            }
   where
     mkLogger :: TL.Level -> IO TL.Logger
     mkLogger lvl = TL.new . TL.setReadEnvironment False . TL.setLogLevel lvl $ TL.defSettings
@@ -89,3 +141,20 @@ mkEnv opts = do
         fromAWSLevel Error = TL.Error
         fromAWSLevel Debug = TL.Debug
         fromAWSLevel Trace = TL.Trace
+
+--
+-- Error handling and logging
+--
+actionE :: ASGActionE () -> ASGAction ()
+actionE m = runExceptT (unASGActionE m) >>= either failWith pure
+  where
+    failWith errMsg = logErrText errMsg >> actionE m
+
+logText :: (MonadIO m, MonadReader Env m) => Text -> m ()
+logText t = do
+    lg <- asks appLogger
+    ll <- asks appLogLevel
+    TL.log lg ll (TL.msg t)
+
+logErrText :: (MonadIO m, MonadReader Env m) => Text -> m ()
+logErrText t = asks appLogger >>= (\logger -> TL.err logger (TL.msg t))

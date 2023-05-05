@@ -43,13 +43,18 @@ library:
   - bytestring
   - containers
   - deepseq
+  - exceptions
   - grpc-haskell
   - grpc-haskell
   - lens
+  - monad-control
+  - mtl
   - proto3-suite
   - proto3-wire
   - text
   - tinylog
+  - transformers
+  - transformers-base
   - vector
 
 executables:
