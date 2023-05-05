@@ -10,11 +10,13 @@ module AutoScalingGroup.Env (
     ASGActionE,
     Env (..),
     Opts (..),
+    EC2Opts (..),
     actionE,
     logErrText,
     logText,
     mkEnv,
-    runASGAction
+    runASGAction,
+    InstanceInfo (..),
 ) where
 
 import Control.Concurrent (MVar, newMVar)
@@ -42,7 +44,7 @@ import Control.Monad.Trans.Control (MonadBaseControl)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import Data.Aeson (FromJSON (..), withText)
 import Data.ByteString.Builder (toLazyByteString)
-import Data.Set as Set
+import Data.HashMap.Strict as HM
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Word (Word16)
@@ -54,6 +56,7 @@ import Network.AWS.Auth (
     SessionToken (..),
  )
 import Network.AWS.Data.ByteString (toBS)
+import Network.AWS.EC2.Types (InstanceType (..))
 import qualified Network.AWS.Env as AWS
 import qualified System.Logger as TL
 import Text.Read (readMaybe)
@@ -66,22 +69,50 @@ data Opts = Opts
     }
     deriving (Show, Generic)
 
+instance FromJSON Opts
+
 data AwsOpts = AwsOpts
     { awsRegion :: Region
     , accessKey :: Text
     , secretKey :: Text
     , sessionToken :: Text
+    , ec2Opts :: EC2Opts
     }
     deriving (Show, Generic)
 
+instance FromJSON AwsOpts
+
+data EC2Opts = EC2Opts
+    { amiId :: Text
+    , securityGroups :: [Text]
+    , instanceType :: InstanceType
+    , namePrefix :: Text
+    , keypair :: Text
+    , subnetId :: Text
+    }
+    deriving (Show, Generic)
+
+instance FromJSON EC2Opts
+
 instance FromJSON TL.Level where
-    parseJSON = withText "Level" $ \lvl -> case readMaybe . T.unpack $ lvl of
-        Just lv -> pure lv
+    parseJSON = withText "Level" $ \tx -> case readMaybe . T.unpack $ tx of
+        Just tp -> pure tp
         Nothing -> fail "Invalid log Level. Valid values: Trace, Debug, Info, Error"
+
+instance FromJSON InstanceType where
+    parseJSON = withText "InstanceType" $ \tx -> case readMaybe . T.unpack $ tx of
+        Just tp -> pure tp
+        Nothing -> fail "Invalid EC2 instance type"
+
+data InstanceInfo = InstanceInfo
+    { privateIp :: Maybe Text
+    , instanceId :: Text
+    }
 
 data Env = Env
     { awsEnv :: AWS.Env
-    , monitors :: MVar (Set Text)
+    , ec2Conf :: EC2Opts
+    , monitors :: MVar (HashMap Text InstanceInfo)
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
@@ -111,10 +142,11 @@ mkEnv :: Opts -> IO Env
 mkEnv opts = do
     logger <- mkLogger $ logLevel opts
     env <- mkAWSEnv (awsOpts opts) (TL.clone (Just "aws_logger") logger)
-    monitorsVar <- newMVar Set.empty
+    monitorsVar <- newMVar HM.empty
     return
         Env
             { awsEnv = env
+            , ec2Conf = ec2Opts $ awsOpts opts
             , appLogger = logger
             , appLogLevel = logLevel opts
             , monitors = monitorsVar

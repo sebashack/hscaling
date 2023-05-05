@@ -45,16 +45,18 @@ library:
   - deepseq
   - exceptions
   - grpc-haskell
-  - grpc-haskell
   - lens
   - monad-control
   - mtl
   - proto3-suite
   - proto3-wire
+  - resourcet
   - text
   - tinylog
   - transformers
   - transformers-base
+  - unordered-containers
+  - uuid
   - vector
 
 executables:
