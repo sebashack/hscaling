@@ -36,6 +36,8 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
+  - amazonka
+  - amazonka-ec2
   - bytestring
   - containers
   - deepseq

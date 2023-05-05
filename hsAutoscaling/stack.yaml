@@ -9,6 +9,9 @@ extra-deps:
   subdirs:
   - .
   - core
+- amazonka-1.6.1
+- amazonka-ec2-1.6.1
 - proto3-suite-0.5.1
 - proto3-wire-1.4.0
+- unliftio-core-0.1.2.0
 - word-compat-0.0.6
