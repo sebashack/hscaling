@@ -36,16 +36,20 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
+  - aeson
   - amazonka
+  - amazonka-core
   - amazonka-ec2
   - bytestring
   - containers
   - deepseq
   - grpc-haskell
   - grpc-haskell
+  - lens
   - proto3-suite
   - proto3-wire
   - text
+  - tinylog
   - vector
 
 executables:

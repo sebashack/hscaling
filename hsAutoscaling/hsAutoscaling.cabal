@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Env
       Grpc.Client
       Grpc.Protobuf.Monitor
   other-modules:
@@ -33,16 +34,20 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      amazonka
+      aeson
+    , amazonka
+    , amazonka-core
     , amazonka-ec2
     , base >=4.7 && <5
     , bytestring
     , containers
     , deepseq
     , grpc-haskell
+    , lens
     , proto3-suite
     , proto3-wire
     , text
+    , tinylog
     , vector
   default-language: Haskell2010
 

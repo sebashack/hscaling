@@ -25,13 +25,10 @@ import Network.GRPC.HighLevel.Generated (
     withGRPCClient,
  )
 
-reqTimeoutSecs :: Int
-reqTimeoutSecs = 5
-
 data MonitorResponse a = OkResponse a | ErrResponse String deriving (Show)
 
-getHeartbeat :: Client -> IO (MonitorResponse ())
-getHeartbeat client = do
+getHeartbeat :: Int -> Client -> IO (MonitorResponse ())
+getHeartbeat reqTimeoutSecs client = do
     let req = ClientNormalRequest HeartbeatRequest reqTimeoutSecs []
     endpoint <- monitorServiceGetHeartbeat <$> monitorServiceClient client
     result <- endpoint req
