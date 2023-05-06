@@ -27,8 +27,8 @@ library
   exposed-modules:
       AutoScalingGroup.AWS
       AutoScalingGroup.Env
-      Grpc.Client
       Grpc.Protobuf.Monitor
+      Grpc.Server
   other-modules:
       Paths_hsAutoscaling
   hs-source-dirs:

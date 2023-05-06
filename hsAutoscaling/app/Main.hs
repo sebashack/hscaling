@@ -1,8 +1,9 @@
 module Main (main) where
 
-import Grpc.Client (getHeartbeat, runActions)
+import Grpc.Server (runServer)
 
 main :: IO ()
 main = do
-    res <- runActions "127.0.0.1" 50001 (getHeartbeat 5)
-    print res
+    putStrLn "Running on 127.0.0.1:50001"
+    runServer "127.0.0.1" 50001
+
