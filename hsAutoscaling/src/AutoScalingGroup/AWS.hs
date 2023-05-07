@@ -44,7 +44,7 @@ runInstance = do
     conf <- asks ec2Conf
     uuid <- liftIO $ fmap toText nextRandom
     let instanceName = namePrefix conf <> "-" <> uuid
-    let req =
+        req =
             runInstances 1 1
                 & risInstanceType .~ Just (instanceType conf)
                 & risKeyName .~ Just (keypair conf)
@@ -55,8 +55,8 @@ runInstance = do
     env <- asks awsEnv
     res <- runAWSAction env (send req)
     let runningInstance = Prelude.head $ view rInstances res
-    let insId = view insInstanceId runningInstance
-    let ipAddr = view insPrivateIPAddress runningInstance
+        insId = view insInstanceId runningInstance
+        ipAddr = view insPrivateIPAddress runningInstance
     return InstanceInfo{privateIp = ipAddr, instanceId = insId}
   where
     tags instanceName =

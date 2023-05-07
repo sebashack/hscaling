@@ -111,9 +111,11 @@ instance FromJSON InstanceType where
         Just tp -> pure tp
         Nothing -> fail "Invalid EC2 instance type"
 
+type InstanceId = Text
+
 data InstanceInfo = InstanceInfo
     { privateIp :: Maybe Text
-    , instanceId :: Text
+    , instanceId :: InstanceId
     }
     deriving (Show)
 
@@ -121,7 +123,7 @@ data Env = Env
     { dbConn :: Connection
     , awsEnv :: AWS.Env
     , ec2Conf :: EC2Opts
-    , monitors :: MVar (HashMap Text InstanceInfo)
+    , monitors :: MVar (HashMap InstanceId InstanceInfo)
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
