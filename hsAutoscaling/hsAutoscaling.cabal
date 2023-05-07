@@ -70,6 +70,8 @@ executable hsAutoscaling-exe
   build-depends:
       base >=4.7 && <5
     , hsAutoscaling
+    , optparse-applicative
+    , yaml
   default-language: Haskell2010
 
 test-suite hsAutoscaling-test

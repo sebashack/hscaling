@@ -1,0 +1,15 @@
+host: 127.0.0.1
+port: 8080
+awsOpts:
+  awsRegion: us-east-1
+  accessKey: xxxx
+  secretKey: xxxx
+  sessionToken: xxxx
+  ec2Opts:
+    amiId: ami-0557a15b87f6559cf
+    securityGroups: ["sg-02b81e14efea62542", "sg-060f019b80316c35a"]
+    instanceType: T2_Micro
+    namePrefix: gobbledygook
+    keypair: vockey
+    subnetId: subnet-05c67d31dd4cfee18
+logLevel: Debug

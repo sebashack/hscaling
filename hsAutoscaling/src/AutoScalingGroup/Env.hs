@@ -63,8 +63,8 @@ import Text.Read (readMaybe)
 
 data Opts = Opts
     { awsOpts :: AwsOpts
-    , clientPort :: Word16
-    , clientRequestTimeoutSecs :: Int
+    , host :: String
+    , port :: Word16
     , logLevel :: TL.Level
     }
     deriving (Show, Generic)
@@ -108,6 +108,7 @@ data InstanceInfo = InstanceInfo
     { privateIp :: Maybe Text
     , instanceId :: Text
     }
+    deriving (Show)
 
 data Env = Env
     { awsEnv :: AWS.Env
@@ -135,8 +136,8 @@ newtype ASGActionE a = ASGActionE
         , MonadError Text
         )
 
-runASGAction :: ASGAction a -> Env -> IO a
-runASGAction = runReaderT
+runASGAction :: Env -> ASGAction a -> IO a
+runASGAction = flip runReaderT
 
 mkEnv :: Opts -> IO Env
 mkEnv opts = do
@@ -177,7 +178,7 @@ mkEnv opts = do
 --
 -- Error handling and logging
 --
-actionE :: ASGActionE () -> ASGAction ()
+actionE :: ASGActionE a -> ASGAction a
 actionE m = runExceptT (unASGActionE m) >>= either failWith pure
   where
     failWith errMsg = logErrText errMsg >> actionE m

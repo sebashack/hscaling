@@ -69,6 +69,8 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - hsAutoscaling
+    - optparse-applicative
+    - yaml
 
 tests:
   hsAutoscaling-test:

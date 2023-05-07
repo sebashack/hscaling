@@ -6,7 +6,6 @@ module AutoScalingGroup.AWS (runInstance) where
 import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceInfo (..))
 import Control.Lens.Getter (view)
 import Control.Lens.Operators ((.~))
-import Control.Monad.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
 import Control.Monad.Trans.AWS (
@@ -17,7 +16,6 @@ import Control.Monad.Trans.AWS (
  )
 import Control.Monad.Trans.Resource (ResourceT)
 import Data.Function ((&))
-import Data.Text
 import Data.UUID (toText)
 import Data.UUID.V4 (nextRandom)
 import Network.AWS.EC2.RunInstances (
@@ -41,7 +39,7 @@ import Network.AWS.EC2.Types (
  )
 import qualified Network.AWS.Env as AWS
 
-runInstance :: (MonadReader Env m, MonadIO m) => ExceptT Text m InstanceInfo
+runInstance :: (MonadReader Env m, MonadIO m) => m InstanceInfo
 runInstance = do
     conf <- asks ec2Conf
     uuid <- liftIO $ fmap toText nextRandom
