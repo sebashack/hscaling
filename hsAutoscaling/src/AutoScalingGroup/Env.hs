@@ -8,19 +8,19 @@
 module AutoScalingGroup.Env (
     ASGAction,
     ASGActionE,
-    Env (..),
-    Opts (..),
     EC2Opts (..),
+    Env (..),
+    InstanceId,
+    InstanceInfo (..),
+    Opts (..),
+    PingOpts (..),
     actionE,
     logErrText,
     logText,
     mkEnv,
     runASGAction,
-    InstanceInfo (..),
-    InstanceId,
 ) where
 
-import Control.Concurrent (MVar, newMVar)
 import Control.Lens.Setter (set)
 import Control.Monad.Base (MonadBase)
 import Control.Monad.Catch (
@@ -45,10 +45,9 @@ import Control.Monad.Trans.Control (MonadBaseControl)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import Data.Aeson (FromJSON (..), withText)
 import Data.ByteString.Builder (toLazyByteString)
-import Data.HashMap.Strict as HM
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Word (Word16)
+import Data.Word (Word16, Word8)
 import Database.SQLite.Simple (
     Connection,
     open,
@@ -68,6 +67,7 @@ import Text.Read (readMaybe)
 
 data Opts = Opts
     { awsOpts :: AwsOpts
+    , pingOpts :: PingOpts
     , host :: String
     , port :: Word16
     , minInstances :: Word16
@@ -78,6 +78,14 @@ data Opts = Opts
     deriving (Show, Generic)
 
 instance FromJSON Opts
+
+data PingOpts = PingOpts
+    { responseTimeoutSecs :: Word8
+    , responseCount :: Word8
+    }
+    deriving (Show, Generic)
+
+instance FromJSON PingOpts
 
 data AwsOpts = AwsOpts
     { awsRegion :: Region
@@ -124,7 +132,7 @@ data Env = Env
     { dbConn :: Connection
     , awsEnv :: AWS.Env
     , ec2Conf :: EC2Opts
-    , monitors :: MVar (HashMap InstanceId InstanceInfo)
+    , pingEnv :: PingOpts
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
@@ -154,16 +162,15 @@ mkEnv :: Opts -> IO Env
 mkEnv opts = do
     logger <- mkLogger $ logLevel opts
     env <- mkAWSEnv (awsOpts opts) (TL.clone (Just "aws_logger") logger)
-    monitorsVar <- newMVar HM.empty
     conn <- open $ dbPath opts
     return
         Env
             { dbConn = conn
             , awsEnv = env
+            , pingEnv = pingOpts opts
             , ec2Conf = ec2Opts $ awsOpts opts
             , appLogger = logger
             , appLogLevel = logLevel opts
-            , monitors = monitorsVar
             }
   where
     mkLogger :: TL.Level -> IO TL.Logger

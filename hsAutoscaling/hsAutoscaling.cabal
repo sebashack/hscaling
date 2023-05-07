@@ -27,6 +27,7 @@ library
   exposed-modules:
       AutoScalingGroup.AWS
       AutoScalingGroup.Env
+      AutoScalingGroup.Ping
       Grpc.Protobuf.Monitor
       Grpc.Server
   other-modules:
@@ -51,6 +52,7 @@ library
     , proto3-suite
     , proto3-wire
     , resourcet
+    , shelly
     , sqlite-simple
     , text
     , tinylog

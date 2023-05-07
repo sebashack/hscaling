@@ -3,6 +3,9 @@ port: 50001
 minInstances: 1
 maxInstances: 5
 dbPath: ./monitordb.sql
+pingOpts:
+  responseTimeoutSecs: 3
+  responseCount: 3
 awsOpts:
   awsRegion: us-east-1
   accessKey: xxxx
@@ -10,7 +13,10 @@ awsOpts:
   sessionToken: xxxx
   ec2Opts:
     amiId: ami-0557a15b87f6559cf
-    securityGroups: ["sg-02b81e14efea62542", "sg-060f019b80316c35a"]
+    securityGroups:
+    - "sg-02b81e14efea62542"
+    - "sg-060f019b80316c35a"
+    - "sg-09d74eb949ad0da22"
     instanceType: T2_Small
     namePrefix: gobbledygook
     keypair: vockey
