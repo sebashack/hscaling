@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module AutoScalingGroup.AWS (runInstance) where
+module AutoScalingGroup.AWS (runInstance, terminateInstance) where
 
-import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceInfo (..))
+import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceId, InstanceInfo (..))
 import Control.Lens.Getter (view)
 import Control.Lens.Operators ((.~))
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -63,6 +63,9 @@ runInstance = do
         tagSpecification
             & tsResourceType .~ Just Instance
             & tsTags .~ [tag "Name" instanceName]
+
+terminateInstance :: (MonadReader Env m, MonadIO m) => InstanceId -> m ()
+terminateInstance insId = undefined
 
 --
 -- Helpers

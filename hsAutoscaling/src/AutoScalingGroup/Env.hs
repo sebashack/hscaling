@@ -17,6 +17,7 @@ module AutoScalingGroup.Env (
     mkEnv,
     runASGAction,
     InstanceInfo (..),
+    InstanceId,
 ) where
 
 import Control.Concurrent (MVar, newMVar)

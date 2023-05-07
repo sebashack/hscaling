@@ -11,7 +11,7 @@ awsOpts:
   ec2Opts:
     amiId: ami-0557a15b87f6559cf
     securityGroups: ["sg-02b81e14efea62542", "sg-060f019b80316c35a"]
-    instanceType: T2_Micro
+    instanceType: T2_Small
     namePrefix: gobbledygook
     keypair: vockey
     subnetId: subnet-05c67d31dd4cfee18
