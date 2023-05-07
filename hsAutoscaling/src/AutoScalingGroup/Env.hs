@@ -48,6 +48,10 @@ import Data.HashMap.Strict as HM
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Word (Word16)
+import Database.SQLite.Simple (
+    Connection,
+    open,
+ )
 import GHC.Generics
 import Network.AWS.Auth (
     AccessKey (..),
@@ -67,6 +71,7 @@ data Opts = Opts
     , port :: Word16
     , minInstances :: Word16
     , maxInstances :: Word16
+    , dbPath :: FilePath
     , logLevel :: TL.Level
     }
     deriving (Show, Generic)
@@ -113,7 +118,8 @@ data InstanceInfo = InstanceInfo
     deriving (Show)
 
 data Env = Env
-    { awsEnv :: AWS.Env
+    { dbConn :: Connection
+    , awsEnv :: AWS.Env
     , ec2Conf :: EC2Opts
     , monitors :: MVar (HashMap Text InstanceInfo)
     , appLogger :: TL.Logger
@@ -146,9 +152,11 @@ mkEnv opts = do
     logger <- mkLogger $ logLevel opts
     env <- mkAWSEnv (awsOpts opts) (TL.clone (Just "aws_logger") logger)
     monitorsVar <- newMVar HM.empty
+    conn <- open $ dbPath opts
     return
         Env
-            { awsEnv = env
+            { dbConn = conn
+            , awsEnv = env
             , ec2Conf = ec2Opts $ awsOpts opts
             , appLogger = logger
             , appLogLevel = logLevel opts

@@ -51,6 +51,7 @@ library:
   - proto3-suite
   - proto3-wire
   - resourcet
+  - sqlite-simple
   - text
   - tinylog
   - transformers
