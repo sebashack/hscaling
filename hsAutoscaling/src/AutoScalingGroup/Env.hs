@@ -65,6 +65,8 @@ data Opts = Opts
     { awsOpts :: AwsOpts
     , host :: String
     , port :: Word16
+    , minInstances :: Word16
+    , maxInstances :: Word16
     , logLevel :: TL.Level
     }
     deriving (Show, Generic)
