@@ -13,5 +13,5 @@ CREATE TABLE metric (
     cpu_load_percentage  REAL NOT NULL,
     http_load_percentage REAL NOT NULL,
     created_at           DATETIME,
-    FOREIGN KEY(instance_id) REFERENCES instance(id)
+    CONSTRAINT fk_instance FOREIGN KEY(instance_id) REFERENCES instance(id) ON DELETE CASCADE
 );
