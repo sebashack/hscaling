@@ -1,7 +1,10 @@
 CREATE TABLE instance (
-    id          TEXT PRIMARY KEY,
-    private_ip  TEXT NOT NULL,
-    created_at  DATETIME
+    id                TEXT PRIMARY KEY,
+    private_ip        TEXT NOT NULL,
+    private_dns_name  TEXT NOT NULL,
+    created_at        DATETIME,
+    UNIQUE(private_ip),
+    UNIQUE(private_dns_name)
 );
 
 CREATE TABLE metric (
