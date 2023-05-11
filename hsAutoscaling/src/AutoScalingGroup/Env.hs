@@ -124,6 +124,7 @@ type InstanceId = Text
 
 data InstanceInfo = InstanceInfo
     { privateIp :: Maybe Text
+    , privateDNSName :: Maybe Text
     , instanceId :: InstanceId
     }
     deriving (Show)

@@ -16,8 +16,12 @@ import Control.Monad.Trans.AWS (
  )
 import Control.Monad.Trans.Resource (ResourceT)
 import Data.Function ((&))
+import Data.Text (Text)
+import Data.Text as T
+import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.UUID (toText)
 import Data.UUID.V4 (nextRandom)
+import Data.Word (Word16)
 import Network.AWS.EC2.RunInstances (
     rInstances,
     risImageId,
@@ -26,11 +30,13 @@ import Network.AWS.EC2.RunInstances (
     risSecurityGroupIds,
     risSubnetId,
     risTagSpecifications,
+    risUserData,
     runInstances,
  )
 import Network.AWS.EC2.Types (
     ResourceType (Instance),
     insInstanceId,
+    insPrivateDNSName,
     insPrivateIPAddress,
     tag,
     tagSpecification,
@@ -39,8 +45,8 @@ import Network.AWS.EC2.Types (
  )
 import qualified Network.AWS.Env as AWS
 
-runInstance :: (MonadReader Env m, MonadIO m) => m InstanceInfo
-runInstance = do
+runInstance :: (MonadReader Env m, MonadIO m) => Text -> Word16 -> m InstanceInfo
+runInstance monitorHost monitorPort = do
     conf <- asks ec2Conf
     uuid <- liftIO $ fmap toText nextRandom
     let instanceName = namePrefix conf <> "-" <> uuid
@@ -52,13 +58,17 @@ runInstance = do
                 & risSubnetId .~ Just (subnetId conf)
                 & risSecurityGroupIds .~ (securityGroups conf)
                 & risTagSpecifications .~ [tags instanceName]
+                & risUserData .~ Just (encodeBase64 launchScript)
     env <- asks awsEnv
     res <- runAWSAction env (send req)
     let runningInstance = Prelude.head $ view rInstances res
         insId = view insInstanceId runningInstance
         ipAddr = view insPrivateIPAddress runningInstance
-    return InstanceInfo{privateIp = ipAddr, instanceId = insId}
+        dnsName = view insPrivateDNSName runningInstance
+    return InstanceInfo{privateIp = ipAddr, instanceId = insId, privateDNSName = dnsName}
   where
+    launchScript = "#!/bin/bash\necho " <> monitorHost <> ":" <> (T.pack $ show monitorPort) <> " > /opt/asg_server"
+    --
     tags instanceName =
         tagSpecification
             & tsResourceType .~ Just Instance
