@@ -13,5 +13,12 @@ CREATE TABLE metric (
     cpu_load_percentage  REAL NOT NULL,
     http_load_percentage REAL NOT NULL,
     created_at           DATETIME,
-    CONSTRAINT fk_instance FOREIGN KEY(instance_id) REFERENCES instance(id) ON DELETE CASCADE
+    CONSTRAINT fk_metric_instance FOREIGN KEY(instance_id) REFERENCES instance(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ping (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    instance_id          TEXT NOT NULL,
+    created_at           DATETIME,
+    CONSTRAINT fk_ping_instance FOREIGN KEY(instance_id) REFERENCES instance(id) ON DELETE CASCADE
 );
