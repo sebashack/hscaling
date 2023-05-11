@@ -1,0 +1,14 @@
+CREATE TABLE instance (
+    id          TEXT PRIMARY KEY,
+    private_ip  TEXT NOT NULL,
+    created_at  DATETIME
+);
+
+CREATE TABLE metric (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    instance_id          TEXT NOT NULL,
+    cpu_load_percentage  REAL NOT NULL,
+    http_load_percentage REAL NOT NULL,
+    created_at           DATETIME,
+    FOREIGN KEY(instance_id) REFERENCES instance(id)
+);
