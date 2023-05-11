@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       AutoScalingGroup.AWS
+      AutoScalingGroup.CRUD
       AutoScalingGroup.Env
       AutoScalingGroup.Ping
       Grpc.Protobuf.Monitor
@@ -51,10 +52,12 @@ library
     , mtl
     , proto3-suite
     , proto3-wire
+    , raw-strings-qq
     , resourcet
     , shelly
     , sqlite-simple
     , text
+    , time
     , tinylog
     , transformers
     , transformers-base
