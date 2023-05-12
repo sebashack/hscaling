@@ -2,13 +2,13 @@ syntax = "proto3";
 package monitor;
 
 service MonitorService {
-  rpc GetMetrics (MetricsRequest) returns (MetricsOkResponse) {}
+  rpc PushMetrics (PushMetricsRequest) returns (PushMetricsOkResponse) {}
 }
 
-message MetricsRequest{
-  string cpu_load = 1;
-  string http_load = 2;
+message PushMetricsRequest{
+  float cpu_load = 1;
+  float http_load = 2;
   string private_dns_name = 3;
 }
 
-message MetricsOkResponse {}
+message PushMetricsOkResponse {}
