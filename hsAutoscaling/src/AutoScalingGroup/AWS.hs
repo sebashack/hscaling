@@ -45,10 +45,12 @@ import Network.AWS.EC2.Types (
  )
 import qualified Network.AWS.Env as AWS
 
-runInstance :: (MonadReader Env m, MonadIO m) => Text -> Word16 -> m InstanceInfo
-runInstance monitorHost monitorPort = do
+runInstance :: (MonadReader Env m, MonadIO m) => m InstanceInfo
+runInstance = do
     conf <- asks ec2Conf
     uuid <- liftIO $ fmap toText nextRandom
+    host <- asks appHost
+    port <- asks appPort
     let instanceName = namePrefix conf <> "-" <> uuid
         req =
             runInstances 1 1
@@ -58,7 +60,7 @@ runInstance monitorHost monitorPort = do
                 & risSubnetId .~ Just (subnetId conf)
                 & risSecurityGroupIds .~ (securityGroups conf)
                 & risTagSpecifications .~ [tags instanceName]
-                & risUserData .~ Just (encodeBase64 launchScript)
+                & risUserData .~ Just (encodeBase64 $ launchScript host port)
     env <- asks awsEnv
     res <- runAWSAction env (send req)
     let runningInstance = Prelude.head $ view rInstances res
@@ -67,7 +69,7 @@ runInstance monitorHost monitorPort = do
         dnsName = view insPrivateDNSName runningInstance
     return InstanceInfo{privateIp = ipAddr, instanceId = insId, privateDNSName = dnsName}
   where
-    launchScript = "#!/bin/bash\necho " <> monitorHost <> ":" <> (T.pack $ show monitorPort) <> " > /opt/asg_server"
+    launchScript host port = "#!/bin/bash\necho " <> host <> ":" <> (T.pack $ show port) <> " > /opt/asg_server"
     --
     tags instanceName =
         tagSpecification

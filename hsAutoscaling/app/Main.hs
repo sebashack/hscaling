@@ -35,7 +35,7 @@ main = do
     case eitherOpts of
         Right opts -> do
             env <- mkEnv opts
-            instanceInfo <- runASGAction env (runInstance "189.12.31.1" 50001)
+            instanceInfo <- runASGAction env runInstance
             print instanceInfo
             --isAlive <- ping "100.26.163.50" (responseTimeoutSecs $ pingEnv env) (responseCount $ pingEnv env)
             --print isAlive

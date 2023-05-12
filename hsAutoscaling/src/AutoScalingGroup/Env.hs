@@ -68,7 +68,7 @@ import Text.Read (readMaybe)
 data Opts = Opts
     { awsOpts :: AwsOpts
     , pingOpts :: PingOpts
-    , host :: String
+    , host :: Text
     , port :: Word16
     , minInstances :: Word16
     , maxInstances :: Word16
@@ -134,6 +134,8 @@ data Env = Env
     , awsEnv :: AWS.Env
     , ec2Conf :: EC2Opts
     , pingEnv :: PingOpts
+    , appHost :: Text
+    , appPort :: Word16
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
@@ -171,6 +173,8 @@ mkEnv opts = do
             , pingEnv = pingOpts opts
             , ec2Conf = ec2Opts $ awsOpts opts
             , appLogger = logger
+            , appHost = host opts
+            , appPort = port opts
             , appLogLevel = logLevel opts
             }
   where
