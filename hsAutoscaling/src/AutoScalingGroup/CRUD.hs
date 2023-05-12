@@ -44,7 +44,7 @@ data Instance = Instance
     deriving (Eq, Show)
 
 instance FromRow Instance where
-    fromRow = InstanceMetrics <$> field <*> field <*> field <*> field
+    fromRow = Instance <$> field <*> field <*> field <*> field
 
 insertInstance :: Connection -> Text -> Text -> Text -> IO ()
 insertInstance conn insId privateIp privateDNSName = do
