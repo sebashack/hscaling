@@ -5,7 +5,7 @@ service MonitorService {
   rpc PushMetrics (PushMetricsRequest) returns (PushMetricsOkResponse) {}
 }
 
-message PushMetricsRequest{
+message PushMetricsRequest {
   float cpu_load = 1;
   float http_load = 2;
   string private_dns_name = 3;
