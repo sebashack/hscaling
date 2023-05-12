@@ -7,7 +7,6 @@ module AutoScalingGroup.CRUD (
     deleteInstance,
     insertInstance,
     insertMetric,
-    insertPing,
     selectInstanceByDNSName,
     selectInstanceCount,
     selectInstanceMetrics,
@@ -70,17 +69,6 @@ insertMetric conn insId cpuLoad httpLoad = do
         [r|
         INSERT INTO metric (instance_id, cpu_load_percentage, http_load_percentage, created_at)
         VALUES (?, ?, ?, ?)
-        |]
-
-insertPing :: Connection -> Text -> IO ()
-insertPing conn insId = do
-    now <- getCurrentTime
-    execute conn q (insId, now)
-  where
-    q =
-        [r|
-        INSERT INTO ping (instance_id, created_at)
-        VALUES (?, ?)
         |]
 
 deleteInstance :: Connection -> Text -> IO ()
