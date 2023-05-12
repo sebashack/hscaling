@@ -1,3 +1,4 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
@@ -7,9 +8,12 @@ module AutoScalingGroup.CRUD (
     insertInstance,
     insertMetric,
     insertPing,
+    selectInstanceByDNSName,
+    selectInstanceCount,
     selectInstanceMetrics,
 ) where
 
+import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, getCurrentTime)
 import Database.SQLite.Simple (
@@ -47,9 +51,9 @@ instance FromRow Instance where
     fromRow = Instance <$> field <*> field <*> field <*> field
 
 insertInstance :: Connection -> Text -> Text -> Text -> IO ()
-insertInstance conn insId privateIp privateDNSName = do
+insertInstance conn insId privIp dnsName = do
     now <- getCurrentTime
-    execute conn q (insId, privateIp, privateDNSName, now)
+    execute conn q (insId, privIp, dnsName, now)
   where
     q =
         [r|
@@ -94,16 +98,20 @@ selectInstanceMetrics conn = do
         WHERE m.created_at = (SELECT MAX(created_at) FROM metric WHERE instance_id = i.id)
         |]
 
-selectIntancesCount :: Connection -> Text -> IO Int
-selectInstanceCount conn = query_ conn "SELECT COUNT(id) FROM instance"
+selectInstanceCount :: Connection -> IO Int
+selectInstanceCount conn = do
+    result <- query_ conn "SELECT COUNT(id) FROM instance"
+    case listToMaybe result of
+        Just (Only v) -> return v
+        Nothing -> return 0
 
-selectInstance :: Connection -> IO [Instance]
-selectInstance conn privateDNSName = do
-    query_ conn q privateDNSName
+selectInstanceByDNSName :: Connection -> Text -> IO [Instance]
+selectInstanceByDNSName conn dnsName = do
+    query conn q (Only dnsName)
   where
     q =
-        [r| 
-	SELECT id, private_ip, private_dns_name, created_at FROM instance WHERE private_dns_name = ?
+        [r|
+        SELECT id, private_ip, private_dns_name, created_at FROM instance WHERE private_dns_name = ?
         |]
 
 closeConn :: Connection -> IO ()
