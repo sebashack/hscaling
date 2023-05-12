@@ -7,21 +7,33 @@ module AutoScalingGroup.CRUD (
     insertInstance,
     insertMetric,
     insertPing,
+    selectInstanceMetrics,
 ) where
 
 import Data.Text (Text)
-import Data.Time.Clock (getCurrentTime)
+import Data.Time.Clock (UTCTime, getCurrentTime)
 import Database.SQLite.Simple (
     Connection,
+    FromRow (..),
     Only (..),
     close,
     execute,
+    field,
     query,
     query_,
  )
 import Text.RawString.QQ
 
-import AutoScalingGroup.TYPES (InstanceMetrics)
+data InstanceMetrics = InstanceMetrics
+    { instanceId :: Text
+    , cpuLoadPercentage :: Double
+    , httpLoadPercentage :: Double
+    , createdAt :: UTCTime
+    }
+    deriving (Eq, Show)
+
+instance FromRow InstanceMetrics where
+    fromRow = InstanceMetrics <$> field <*> field <*> field <*> field
 
 insertInstance :: Connection -> Text -> Text -> Text -> IO ()
 insertInstance conn insId privateIp privateDNSName = do
@@ -59,17 +71,17 @@ insertPing conn insId = do
 deleteInstance :: Connection -> Text -> IO ()
 deleteInstance conn insId = execute conn "DELETE FROM instance WHERE id=?" (Only insId)
 
+selectInstanceMetrics :: Connection -> IO [InstanceMetrics]
+selectInstanceMetrics conn = do
+    query_ conn q
+  where
+    q =
+        [r|
+        SELECT i.id, m.cpu_load_percentage, m.http_load_percentage, m.created_at
+        FROM instance i
+        INNER JOIN metric m ON i.id = m.instance_id
+        WHERE m.created_at = (SELECT MAX(created_at) FROM metric WHERE instance_id = i.id)
+        |]
+
 closeConn :: Connection -> IO ()
 closeConn = close
-
-selectInstancesMetrics :: Connection -> IO [InstanceMetrics]
-selectInstancesMetrics conn = do
-  query_ conn q
-  where
-    q = "SELECT instc.id, met.cpu_load_percentage, met.http_load_percentage, met.created_at \
-        \FROM instance instc \
-        \INNER JOIN metric met ON instc.id = met.instance_id \
-        \WHERE met.created_at = ( \
-        \SELECT MAX(created_at) \
-        \FROM metric \
-        \WHERE instance_id = instc.id)"

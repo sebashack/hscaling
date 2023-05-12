@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module AutoScalingGroup.Ping where
+module AutoScalingGroup.Ping (ping) where
 
 import Data.Text (Text)
 import Data.Text as T
