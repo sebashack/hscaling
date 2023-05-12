@@ -21,6 +21,8 @@ import Database.SQLite.Simple (
  )
 import Text.RawString.QQ
 
+import AutoScalingGroup.TYPES (InstanceMetrics)
+
 insertInstance :: Connection -> Text -> Text -> Text -> IO ()
 insertInstance conn insId privateIp privateDNSName = do
     now <- getCurrentTime
@@ -59,3 +61,15 @@ deleteInstance conn insId = execute conn "DELETE FROM instance WHERE id=?" (Only
 
 closeConn :: Connection -> IO ()
 closeConn = close
+
+selectInstancesMetrics :: Connection -> IO [InstanceMetrics]
+selectInstancesMetrics conn = do
+  query_ conn q
+  where
+    q = "SELECT instc.id, met.cpu_load_percentage, met.http_load_percentage, met.created_at \
+        \FROM instance instc \
+        \INNER JOIN metric met ON instc.id = met.instance_id \
+        \WHERE met.created_at = ( \
+        \SELECT MAX(created_at) \
+        \FROM metric \
+        \WHERE instance_id = instc.id)"
