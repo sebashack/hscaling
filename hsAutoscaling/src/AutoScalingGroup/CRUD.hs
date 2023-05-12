@@ -35,6 +35,17 @@ data InstanceMetrics = InstanceMetrics
 instance FromRow InstanceMetrics where
     fromRow = InstanceMetrics <$> field <*> field <*> field <*> field
 
+data Instance = Instance
+    { instanceId :: Text
+    , privateIp :: Text
+    , privateDNSName :: Text
+    , createdAt :: UTCTime
+    }
+    deriving (Eq, Show)
+
+instance FromRow Instance where
+    fromRow = InstanceMetrics <$> field <*> field <*> field <*> field
+
 insertInstance :: Connection -> Text -> Text -> Text -> IO ()
 insertInstance conn insId privateIp privateDNSName = do
     now <- getCurrentTime
@@ -81,6 +92,18 @@ selectInstanceMetrics conn = do
         FROM instance i
         INNER JOIN metric m ON i.id = m.instance_id
         WHERE m.created_at = (SELECT MAX(created_at) FROM metric WHERE instance_id = i.id)
+        |]
+
+selectIntancesCount :: Connection -> Text -> IO Int
+selectInstanceCount conn = query_ conn "SELECT COUNT(id) FROM instance"
+
+selectInstance :: Connection -> IO [Instance]
+selectInstance conn privateDNSName = do
+    query_ conn q privateDNSName
+  where
+    q =
+        [r| 
+	SELECT id, private_ip, private_dns_name, created_at FROM instance WHERE private_dns_name = ?
         |]
 
 closeConn :: Connection -> IO ()
