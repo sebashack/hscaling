@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module AutoScalingGroup.AWS (runInstance, terminateInstance) where
+module AutoScalingGroup.AWS (
+    runInstance,
+    terminateInstance,
+    InstanceInfo (..),
+) where
 
-import Data.Text.Lazy as LT (toStrict)
-import Data.Aeson.Text (encodeToLazyText)
 import Control.Lens.Getter (view)
 import Control.Lens.Operators ((.~))
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -16,8 +18,12 @@ import Control.Monad.Trans.AWS (
     send,
  )
 import Control.Monad.Trans.Resource (ResourceT)
+import Data.Aeson.Text (encodeToLazyText)
 import Data.Function ((&))
+import Data.Maybe (fromJust)
+import Data.Text (Text)
 import Data.Text.Encoding.Base64 (encodeBase64)
+import Data.Text.Lazy as LT (toStrict)
 import Data.UUID (toText)
 import Data.UUID.V4 (nextRandom)
 import Network.AWS.EC2.RunInstances (
@@ -44,7 +50,17 @@ import Network.AWS.EC2.Types (
  )
 import qualified Network.AWS.Env as AWS
 
-import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceId, InstanceInfo (..))
+import AutoScalingGroup.Env (
+    EC2Opts (..),
+    Env (..),
+ )
+
+data InstanceInfo = InstanceInfo
+    { privateIp :: Text
+    , privateDNSName :: Text
+    , instanceId :: Text
+    }
+    deriving (Show)
 
 runInstance :: (MonadReader Env m, MonadIO m) => m InstanceInfo
 runInstance = do
@@ -68,8 +84,10 @@ runInstance = do
         insId = view insInstanceId runningInstance
         ipAddr = view insPrivateIPAddress runningInstance
         dnsName = view insPrivateDNSName runningInstance
-    return InstanceInfo{privateIp = ipAddr, instanceId = insId, privateDNSName = dnsName}
+    return InstanceInfo{privateIp = fromJust' ipAddr, instanceId = insId, privateDNSName = fromJust' dnsName}
   where
+    fromJust' = fromJust (error "Instance without private-ip")
+    --
     launchScript conf = "#!/bin/bash\necho '" <> conf <> "' > /opt/monitor_config.json"
     --
     tags instanceName =
@@ -77,7 +95,7 @@ runInstance = do
             & tsResourceType .~ Just Instance
             & tsTags .~ [tag "Name" instanceName]
 
-terminateInstance :: (MonadReader Env m, MonadIO m) => InstanceId -> m ()
+terminateInstance :: (MonadReader Env m, MonadIO m) => Text -> m ()
 terminateInstance insId = do
     let req = terminateInstances & tiInstanceIds .~ [insId]
     env <- asks awsEnv

@@ -25,10 +25,12 @@ source-repository head
 
 library
   exposed-modules:
+      AutoScalingGroup.App
       AutoScalingGroup.AWS
       AutoScalingGroup.CRUD
       AutoScalingGroup.Env
       AutoScalingGroup.Ping
+      AutoScalingGroup.Scaling
       Grpc.Protobuf.Monitor
       Grpc.Server
   other-modules:
@@ -49,6 +51,7 @@ library
     , exceptions
     , grpc-haskell
     , lens
+    , lifted-async
     , monad-control
     , mtl
     , proto3-suite

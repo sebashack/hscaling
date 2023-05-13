@@ -47,6 +47,7 @@ library:
   - exceptions
   - grpc-haskell
   - lens
+  - lifted-async
   - monad-control
   - mtl
   - proto3-suite

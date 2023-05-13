@@ -10,8 +10,6 @@ module AutoScalingGroup.Env (
     ASGActionE,
     EC2Opts (..),
     Env (..),
-    InstanceId,
-    InstanceInfo (..),
     Opts (..),
     PingOpts (..),
     actionE,
@@ -68,13 +66,18 @@ import Text.Read (readMaybe)
 import AutoScalingGroup.CRUD (enableForeignKeys)
 
 data Opts = Opts
-    { awsOpts :: AwsOpts
+    { grpcHost :: String
+    , grpcPort :: Int
+    , awsOpts :: AwsOpts
     , pingOpts :: PingOpts
+    , balancingFrequencySecs :: Word16
     , minInstances :: Word16
     , maxInstances :: Word16
     , dbPath :: FilePath
     , logLevel :: TL.Level
     , monitorOpts :: MonitorOpts
+    , httpMaxLoadPercentage :: Maybe Float
+    , cpuMaxLoadPercentage :: Maybe Float
     }
     deriving (Show, Generic)
 
@@ -94,6 +97,7 @@ instance ToJSON MonitorOpts
 data PingOpts = PingOpts
     { responseTimeoutSecs :: Word8
     , responseCount :: Word8
+    , pingFrequencySecs :: Word16
     }
     deriving (Show, Generic)
 
@@ -132,21 +136,19 @@ instance FromJSON InstanceType where
         Just tp -> pure tp
         Nothing -> fail "Invalid EC2 instance type"
 
-type InstanceId = Text
-
-data InstanceInfo = InstanceInfo
-    { privateIp :: Maybe Text
-    , privateDNSName :: Maybe Text
-    , instanceId :: InstanceId
-    }
-    deriving (Show)
-
 data Env = Env
     { dbConn :: Connection
     , awsEnv :: AWS.Env
     , ec2Conf :: EC2Opts
-    , pingEnv :: PingOpts
+    , pingConf :: PingOpts
     , monitorConf :: MonitorOpts
+    , appHttpMaxLoadPercentage :: Maybe Float
+    , appCpuMaxLoadPercentage :: Maybe Float
+    , appMinInstances :: Word16
+    , appMaxInstances :: Word16
+    , appBalancingFrequency :: Word16
+    , appGrpcHost :: String
+    , appGrpcPort :: Int
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
@@ -182,11 +184,18 @@ mkEnv opts = do
         Env
             { dbConn = conn
             , awsEnv = env
-            , pingEnv = pingOpts opts
+            , pingConf = pingOpts opts
             , ec2Conf = ec2Opts $ awsOpts opts
             , monitorConf = monitorOpts opts
+            , appMinInstances = minInstances opts
+            , appMaxInstances = maxInstances opts
+            , appBalancingFrequency = balancingFrequencySecs opts
             , appLogger = logger
             , appLogLevel = logLevel opts
+            , appGrpcHost = grpcHost opts
+            , appGrpcPort = grpcPort opts
+            , appHttpMaxLoadPercentage = httpMaxLoadPercentage opts
+            , appCpuMaxLoadPercentage = cpuMaxLoadPercentage opts
             }
   where
     mkLogger :: TL.Level -> IO TL.Logger
