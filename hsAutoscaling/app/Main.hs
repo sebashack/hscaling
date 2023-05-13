@@ -21,7 +21,6 @@ import Options.Applicative (
 
 import AutoScalingGroup.AWS (runInstance, terminateInstance)
 import AutoScalingGroup.Env (Env (..), PingOpts (..), mkEnv, runASGAction)
-import AutoScalingGroup.Ping (ping)
 
 newtype CmdOpts = CmdOpts
     { configPath :: String

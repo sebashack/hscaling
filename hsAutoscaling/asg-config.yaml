@@ -1,5 +1,6 @@
 minInstances: 1
 maxInstances: 5
+balancingFrequencySecs: 20
 dbPath: ./db/test-monitor.db
 monitorOpts:
   asgServerHost: 127.0.0.1
@@ -9,6 +10,7 @@ monitorOpts:
 pingOpts:
   responseTimeoutSecs: 3
   responseCount: 3
+  pingFrequencySecs: 2
 awsOpts:
   awsRegion: us-east-1
   accessKey: xxxx

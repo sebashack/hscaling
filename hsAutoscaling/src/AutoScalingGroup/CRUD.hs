@@ -13,6 +13,7 @@ module AutoScalingGroup.CRUD (
     enableForeignKeys,
     Instance (..),
     InstanceMetrics (..),
+    selectInstances,
 ) where
 
 import Data.Maybe (listToMaybe)
@@ -79,8 +80,7 @@ deleteInstance :: Connection -> Text -> IO ()
 deleteInstance conn insId = execute conn "DELETE FROM instance WHERE id=?" (Only insId)
 
 selectInstanceMetrics :: Connection -> IO [InstanceMetrics]
-selectInstanceMetrics conn = do
-    query_ conn q
+selectInstanceMetrics conn = query_ conn q
   where
     q =
         [r|
@@ -106,6 +106,9 @@ selectInstanceByDNSName conn dnsName = do
         [r|
         SELECT id, private_ip, private_dns_name, created_at FROM instance WHERE private_dns_name = ?
         |]
+
+selectInstances :: Connection -> IO [Instance]
+selectInstances conn = query_ conn "SELECT id, private_ip, private_dns_name, created_at FROM instance"
 
 enableForeignKeys :: Connection -> IO ()
 enableForeignKeys conn = execute_ conn "PRAGMA foreign_keys=ON"
