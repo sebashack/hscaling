@@ -65,6 +65,8 @@ import qualified Network.AWS.Env as AWS
 import qualified System.Logger as TL
 import Text.Read (readMaybe)
 
+import AutoScalingGroup.CRUD (enableForeignKeys)
+
 data Opts = Opts
     { awsOpts :: AwsOpts
     , pingOpts :: PingOpts
@@ -166,6 +168,7 @@ mkEnv opts = do
     logger <- mkLogger $ logLevel opts
     env <- mkAWSEnv (awsOpts opts) (TL.clone (Just "aws_logger") logger)
     conn <- open $ dbPath opts
+    enableForeignKeys conn
     return
         Env
             { dbConn = conn

@@ -16,12 +16,10 @@ import Control.Monad.Trans.AWS (
  )
 import Control.Monad.Trans.Resource (ResourceT)
 import Data.Function ((&))
-import Data.Text (Text)
 import Data.Text as T
 import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.UUID (toText)
 import Data.UUID.V4 (nextRandom)
-import Data.Word (Word16)
 import Network.AWS.EC2.RunInstances (
     rInstances,
     risImageId,

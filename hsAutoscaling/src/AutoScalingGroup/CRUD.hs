@@ -10,6 +10,7 @@ module AutoScalingGroup.CRUD (
     selectInstanceByDNSName,
     selectInstanceCount,
     selectInstanceMetrics,
+    enableForeignKeys,
 ) where
 
 import Data.Maybe (listToMaybe)
@@ -21,6 +22,7 @@ import Database.SQLite.Simple (
     Only (..),
     close,
     execute,
+    execute_,
     field,
     query,
     query_,
@@ -93,14 +95,18 @@ selectInstanceCount conn = do
         Just (Only v) -> return v
         Nothing -> return 0
 
-selectInstanceByDNSName :: Connection -> Text -> IO [Instance]
+selectInstanceByDNSName :: Connection -> Text -> IO (Maybe Instance)
 selectInstanceByDNSName conn dnsName = do
-    query conn q (Only dnsName)
+    result <- query conn q (Only dnsName)
+    pure $ listToMaybe result
   where
     q =
         [r|
         SELECT id, private_ip, private_dns_name, created_at FROM instance WHERE private_dns_name = ?
         |]
+
+enableForeignKeys :: Connection -> IO ()
+enableForeignKeys conn = execute_ conn "PRAGMA foreign_keys=ON"
 
 closeConn :: Connection -> IO ()
 closeConn = close

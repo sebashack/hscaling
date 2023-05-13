@@ -20,7 +20,7 @@ import Options.Applicative (
  )
 
 import AutoScalingGroup.AWS (runInstance)
-import AutoScalingGroup.Env (mkEnv, runASGAction, Env(pingEnv), PingOpts(..))
+import AutoScalingGroup.Env (Env (dbConn, pingEnv), PingOpts (..), mkEnv, runASGAction)
 import AutoScalingGroup.Ping (ping)
 
 newtype CmdOpts = CmdOpts
@@ -35,10 +35,11 @@ main = do
     case eitherOpts of
         Right opts -> do
             env <- mkEnv opts
-            instanceInfo <- runASGAction env runInstance
-            print instanceInfo
-            --isAlive <- ping "100.26.163.50" (responseTimeoutSecs $ pingEnv env) (responseCount $ pingEnv env)
-            --print isAlive
+            let conn = dbConn env
+            -- instanceInfo <- runASGAction env runInstance
+            -- print instanceInfo
+            isAlive <- ping "100.26.163.50" (responseTimeoutSecs $ pingEnv env) (responseCount $ pingEnv env)
+            print isAlive
         Left e -> error $ show e
 
 parserInfo :: ParserInfo CmdOpts
