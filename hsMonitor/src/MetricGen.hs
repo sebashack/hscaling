@@ -15,8 +15,8 @@ type Seed = Gen (PrimState IO)
 genSeed :: IO Seed
 genSeed = create
 
-genRandomVar :: RVar Int
-genRandomVar = poisson (6.5 :: Float)
+genRandomVar :: Float -> RVar Int
+genRandomVar lambda = poisson lambda
 
 sampleLoad :: Seed -> RVar Int -> IO Float
 sampleLoad seed rvar = do

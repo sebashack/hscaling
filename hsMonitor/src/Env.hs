@@ -1,15 +1,25 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Env (mkEnv, Env (..)) where
 
-import Control.Monad (void)
+import Data.Aeson (FromJSON (..), eitherDecodeFileStrict')
 import Data.Random (RVar)
-import Data.Text (Text)
 import Data.Text as T
-import Data.Text.Read (decimal)
-import Shelly (lastExitCode, run, shelly, silently)
+import GHC.Generics
+import Shelly (run, shelly, silently)
 
 import MetricGen (Seed, genRandomVar, genSeed)
+
+data Opts = Opts
+    { asgServerHost :: String
+    , asgServerPort :: Int
+    , samplingLambda :: Float
+    , pushFrequencySecs :: Int
+    }
+    deriving (Show, Generic)
+
+instance FromJSON Opts
 
 data Env = Env
     { asgHost :: String
@@ -17,31 +27,28 @@ data Env = Env
     , privateDNSName :: Text
     , seed :: Seed
     , rvar :: RVar Int
+    , pushFrequency :: Int
     }
 
 mkEnv :: IO Env
 mkEnv = do
     dnsName <- getPrivateDNSName
-    (host, port) <- getMonitorHostAndPort
-    s <- genSeed
-    return
-        Env
-            { asgHost = T.unpack host
-            , asgPort = port
-            , privateDNSName = dnsName
-            , seed = s
-            , rvar = genRandomVar
-            }
+    eitherConf <- eitherDecodeFileStrict' "/opt/monitor_config.json"
+    case eitherConf of
+        Left _ -> error "Could not parse monitor_config.json"
+        Right opts -> do
+            s <- genSeed
+            return $
+                Env
+                    { asgHost = asgServerHost opts
+                    , asgPort = asgServerPort opts
+                    , privateDNSName = dnsName
+                    , seed = s
+                    , rvar = genRandomVar $ samplingLambda opts
+                    , pushFrequency = pushFrequencySecs opts
+                    }
   where
     getPrivateDNSName :: IO Text
     getPrivateDNSName = shelly $ silently $ do
         out <- run "hostname" []
         return ((T.strip out) <> ".ec2.internal")
-
-    getMonitorHostAndPort :: IO (Text, Int)
-    getMonitorHostAndPort = shelly $ silently $ do
-        out <- run "cat" ["/opt/asg_server"]
-        let host : port : _ = T.splitOn ":" out
-        case decimal port of
-            Left err -> error err
-            Right (p, _) -> return (host, p)

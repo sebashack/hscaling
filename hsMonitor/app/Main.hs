@@ -3,14 +3,11 @@
 module Main (main) where
 
 import Control.Concurrent (threadDelay)
-import Control.Monad (forever, replicateM_)
+import Control.Monad (forever, void)
 
 import Env (Env (..), mkEnv)
 import Grpc.Client (pushMetrics, runActions)
-import MetricGen (genRandomVar, genSeed, sampleLoad)
-
-tenSecs :: Int
-tenSecs = 10000000
+import MetricGen (sampleLoad)
 
 main :: IO ()
 main = do
@@ -18,5 +15,5 @@ main = do
     runActions (asgHost env) (asgPort env) $ \client -> forever $ do
         cpuLoad <- sampleLoad (seed env) (rvar env)
         httpLoad <- sampleLoad (seed env) (rvar env)
-        (pushMetrics cpuLoad httpLoad undefined 5 client)
-        threadDelay tenSecs
+        void $ pushMetrics cpuLoad httpLoad (privateDNSName env) 5 client
+        threadDelay $ pushFrequency env
