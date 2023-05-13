@@ -3,8 +3,6 @@
 
 module AutoScalingGroup.AWS (runInstance, terminateInstance) where
 
-import Data.Text.Lazy as LT (toStrict)
-import Data.Aeson.Text (encodeToLazyText)
 import Control.Lens.Getter (view)
 import Control.Lens.Operators ((.~))
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -16,8 +14,10 @@ import Control.Monad.Trans.AWS (
     send,
  )
 import Control.Monad.Trans.Resource (ResourceT)
+import Data.Aeson.Text (encodeToLazyText)
 import Data.Function ((&))
 import Data.Text.Encoding.Base64 (encodeBase64)
+import Data.Text.Lazy as LT (toStrict)
 import Data.UUID (toText)
 import Data.UUID.V4 (nextRandom)
 import Network.AWS.EC2.RunInstances (

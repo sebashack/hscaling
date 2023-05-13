@@ -8,15 +8,14 @@ module Grpc.Server (
     runServer,
 ) where
 
-import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Internal (packChars)
+import Data.Text.Lazy as TL (toStrict, unpack)
 import Grpc.Protobuf.Monitor (
     MonitorService (..),
     PushMetricsOkResponse (..),
     PushMetricsRequest (..),
     monitorServiceServer,
  )
-
 import Network.GRPC.HighLevel.Generated (
     GRPCMethodType (Normal),
     Host (..),
@@ -28,26 +27,31 @@ import Network.GRPC.HighLevel.Generated (
     defaultServiceOptions,
  )
 
+import AutoScalingGroup.CRUD (
+    Instance (privateDNSName),
+    insertMetric,
+    selectInstanceByDNSName,
+ )
 import Database.SQLite.Simple (Connection)
 
-import AutoScalingGroup.CRUD (selectInstanceByDNSName, insertMetric)
-
-handlers :: MonitorService ServerRequest ServerResponse
-handlers =
+handlers :: Connection -> MonitorService ServerRequest ServerResponse
+handlers conn =
     MonitorService
-        { monitorServicePushMetrics = getMetricsHandler
+        { monitorServicePushMetrics = getMetricsHandler conn
         }
 
 getMetricsHandler :: Connection -> ServerRequest 'Normal PushMetricsRequest PushMetricsOkResponse -> IO (ServerResponse 'Normal PushMetricsOkResponse)
 getMetricsHandler conn (ServerNormalRequest _metadata (PushMetricsRequest cpuLoad httpLoad dnsName)) = do
-    instance_id = selectInstanceByDNSName conn dnsName
-    insertMetric conn instance_id cpuLoad httpLoad
-    --liftIO $ print ("CPU LOAD = " <> show cpuLoad)
-    --liftIO $ print ("HTTP LOAD = " <> show httpLoad)
-    --liftIO $ print ("DNS NAME = " <> show dnsName)
-    return $ ServerNormalResponse PushMetricsOkResponse [] StatusOk "Status ok"
+    maybeIns <- selectInstanceByDNSName conn (TL.toStrict dnsName)
+    case maybeIns of
+        Just ins -> do
+            insertMetric conn (privateDNSName ins) cpuLoad httpLoad
+            return $ ServerNormalResponse PushMetricsOkResponse [] StatusOk "Status ok"
+        Nothing -> do
+            putStrLn ("Non-registered instance wth dnsName " <> (TL.unpack dnsName))
+            return $ ServerNormalResponse PushMetricsOkResponse [] StatusNotFound "Instance not found"
 
-runServer :: String -> Int -> IO ()
-runServer host port =
+runServer :: Connection -> String -> Int -> IO ()
+runServer conn host port =
     let options = defaultServiceOptions{serverHost = Host $ packChars host, serverPort = Port port}
-     in monitorServiceServer handlers options
+     in monitorServiceServer (handlers conn) options

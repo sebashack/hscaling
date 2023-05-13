@@ -11,6 +11,8 @@ module AutoScalingGroup.CRUD (
     selectInstanceCount,
     selectInstanceMetrics,
     enableForeignKeys,
+    Instance (..),
+    InstanceMetrics (..),
 ) where
 
 import Data.Maybe (listToMaybe)
