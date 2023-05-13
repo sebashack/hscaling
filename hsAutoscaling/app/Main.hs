@@ -19,8 +19,8 @@ import Options.Applicative (
     strOption,
  )
 
-import AutoScalingGroup.AWS (runInstance, terminateInstance)
-import AutoScalingGroup.Env (Env (..), PingOpts (..), mkEnv, runASGAction)
+import AutoScalingGroup.App (runApp)
+import AutoScalingGroup.Env (mkEnv)
 
 newtype CmdOpts = CmdOpts
     { configPath :: String
@@ -34,12 +34,7 @@ main = do
     case eitherOpts of
         Right opts -> do
             env <- mkEnv opts
-            let conn = dbConn env
-            instanceInfo <- runASGAction env runInstance
-            print instanceInfo
-            -- runASGAction env (terminateInstance "i-0a9b816724ece6edc")
-            -- isAlive <- ping "100.26.163.50" (responseTimeoutSecs $ pingEnv env) (responseCount $ pingEnv env)
-            -- print isAlive
+            runApp env
         Left e -> error $ show e
 
 parserInfo :: ParserInfo CmdOpts

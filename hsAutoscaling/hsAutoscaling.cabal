@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      AutoScalingGroup.App
       AutoScalingGroup.AWS
       AutoScalingGroup.CRUD
       AutoScalingGroup.Env

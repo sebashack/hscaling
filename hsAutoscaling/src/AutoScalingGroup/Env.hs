@@ -66,7 +66,9 @@ import Text.Read (readMaybe)
 import AutoScalingGroup.CRUD (enableForeignKeys)
 
 data Opts = Opts
-    { awsOpts :: AwsOpts
+    { grpcHost :: String
+    , grpcPort :: Int
+    , awsOpts :: AwsOpts
     , pingOpts :: PingOpts
     , balancingFrequencySecs :: Word16
     , minInstances :: Word16
@@ -145,6 +147,8 @@ data Env = Env
     , appMinInstances :: Word16
     , appMaxInstances :: Word16
     , appBalancingFrequency :: Word16
+    , appGrpcHost :: String
+    , appGrpcPort :: Int
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
@@ -188,6 +192,8 @@ mkEnv opts = do
             , appBalancingFrequency = balancingFrequencySecs opts
             , appLogger = logger
             , appLogLevel = logLevel opts
+            , appGrpcHost = grpcHost opts
+            , appGrpcPort = grpcPort opts
             , appHttpMaxLoadPercentage = httpMaxLoadPercentage opts
             , appCpuMaxLoadPercentage = cpuMaxLoadPercentage opts
             }

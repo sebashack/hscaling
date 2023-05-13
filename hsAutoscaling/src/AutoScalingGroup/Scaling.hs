@@ -1,20 +1,33 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module AutoScalingGroup.Scaling (scaleAction) where
+module AutoScalingGroup.Scaling (scaleAction, initializeInstances) where
 
+import Control.Monad (replicateM_)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (asks)
 
 import AutoScalingGroup.AWS (runInstance, terminateInstance)
 import AutoScalingGroup.AWS as INF (InstanceInfo (..))
-import AutoScalingGroup.CRUD as IM (InstanceMetrics (..))
 import AutoScalingGroup.CRUD (
     deleteInstance,
     insertInstance,
     selectInstanceCount,
     selectInstanceMetrics,
  )
+import AutoScalingGroup.CRUD as IM (InstanceMetrics (..))
 import AutoScalingGroup.Env (ASGActionE, Env (..), logText)
+
+initializeInstances :: ASGActionE ()
+initializeInstances = do
+    conn <- asks dbConn
+    minCount <- asks appMinInstances
+    currentCount <- liftIO $ selectInstanceCount conn
+    let diff = (fromIntegral minCount) - currentCount
+    if diff > 0
+        then replicateM_ diff $ do
+            info <- runInstance
+            liftIO $ insertInstance conn (INF.instanceId info) (INF.privateIp info) (INF.privateDNSName info)
+        else return ()
 
 scaleAction :: ASGActionE ()
 scaleAction = do

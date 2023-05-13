@@ -55,4 +55,6 @@ getMetricsHandler conn (ServerNormalRequest _metadata (PushMetricsRequest cpuLoa
 runServer :: Connection -> String -> Int -> IO ()
 runServer conn host port =
     let options = defaultServiceOptions{serverHost = Host $ packChars host, serverPort = Port port}
-     in monitorServiceServer (handlers conn) options
+     in do
+        putStrLn ("Running grpc server on " <> host <> ":" <> show port)
+        monitorServiceServer (handlers conn) options

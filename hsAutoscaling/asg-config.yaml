@@ -1,3 +1,5 @@
+grpcHost: 127.0.0.1
+grpcPort: 50001
 minInstances: 1
 maxInstances: 5
 balancingFrequencySecs: 20
