@@ -3,7 +3,7 @@
 module AutoScalingGroup.Ping (pingAction) where
 
 import Control.Concurrent.Async.Lifted (mapConcurrently_)
-import Control.Monad (mapM_, void)
+import Control.Monad (void)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (asks)
 import Data.Text as T
