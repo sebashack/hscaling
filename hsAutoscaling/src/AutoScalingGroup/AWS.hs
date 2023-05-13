@@ -7,7 +7,7 @@ import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceId, InstanceInfo (.
 import Control.Lens.Getter (view)
 import Control.Lens.Operators ((.~))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (MonadReader, asks)
+import Control.Monad.Reader (MonadReader, asks, void)
 import Control.Monad.Trans.AWS (
     AWST,
     runAWST,
@@ -31,6 +31,7 @@ import Network.AWS.EC2.RunInstances (
     risUserData,
     runInstances,
  )
+import Network.AWS.EC2.TerminateInstances (terminateInstances, tiInstanceIds)
 import Network.AWS.EC2.Types (
     ResourceType (Instance),
     insInstanceId,
@@ -75,7 +76,10 @@ runInstance = do
             & tsTags .~ [tag "Name" instanceName]
 
 terminateInstance :: (MonadReader Env m, MonadIO m) => InstanceId -> m ()
-terminateInstance insId = undefined
+terminateInstance insId = do
+    let req = terminateInstances & tiInstanceIds .~ [insId]
+    env <- asks awsEnv
+    void $ runAWSAction env (send req)
 
 --
 -- Helpers

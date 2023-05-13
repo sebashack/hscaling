@@ -8,7 +8,7 @@ module Grpc.Server (
     runServer,
 ) where
 
-import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Internal (packChars)
 import Grpc.Protobuf.Monitor (
     MonitorService (..),
