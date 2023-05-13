@@ -8,11 +8,12 @@ module Grpc.Server (
     runServer,
 ) where
 
+import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Internal (packChars)
 import Grpc.Protobuf.Monitor (
-    HeartbeatOkResponse (..),
-    HeartbeatRequest (..),
     MonitorService (..),
+    PushMetricsOkResponse (..),
+    PushMetricsRequest (..),
     monitorServiceServer,
  )
 
@@ -30,11 +31,15 @@ import Network.GRPC.HighLevel.Generated (
 handlers :: MonitorService ServerRequest ServerResponse
 handlers =
     MonitorService
-        { monitorServiceGetHeartbeat = getHeartbeatHandler
+        { monitorServicePushMetrics = getMetricsHandler
         }
 
-getHeartbeatHandler :: ServerRequest 'Normal HeartbeatRequest HeartbeatOkResponse -> IO (ServerResponse 'Normal HeartbeatOkResponse)
-getHeartbeatHandler (ServerNormalRequest _metadata HeartbeatRequest) = return $ ServerNormalResponse (HeartbeatOkResponse "Ok") [] StatusOk "Status ok"
+getMetricsHandler :: ServerRequest 'Normal PushMetricsRequest PushMetricsOkResponse -> IO (ServerResponse 'Normal PushMetricsOkResponse)
+getMetricsHandler (ServerNormalRequest _metadata (PushMetricsRequest cpuLoad httpLoad dnsName)) = do
+    liftIO $ print ("CPU LOAD = " <> show cpuLoad)
+    liftIO $ print ("HTTP LOAD = " <> show httpLoad)
+    liftIO $ print ("DNS NAME = " <> show dnsName)
+    return $ ServerNormalResponse PushMetricsOkResponse [] StatusOk "Status ok"
 
 runServer :: String -> Int -> IO ()
 runServer host port =

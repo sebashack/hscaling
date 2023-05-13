@@ -42,30 +42,30 @@ import Network.GRPC.HighLevel.Server.Unregistered as HsGRPC
        (serverLoop)
  
 data MonitorService request
-     response = MonitorService{monitorServiceGetHeartbeat ::
-                               request 'HsGRPC.Normal Grpc.Protobuf.Monitor.HeartbeatRequest
-                                 Grpc.Protobuf.Monitor.HeartbeatOkResponse
+     response = MonitorService{monitorServicePushMetrics ::
+                               request 'HsGRPC.Normal Grpc.Protobuf.Monitor.PushMetricsRequest
+                                 Grpc.Protobuf.Monitor.PushMetricsOkResponse
                                  ->
                                  Hs.IO
                                    (response 'HsGRPC.Normal
-                                      Grpc.Protobuf.Monitor.HeartbeatOkResponse)}
+                                      Grpc.Protobuf.Monitor.PushMetricsOkResponse)}
               deriving Hs.Generic
  
 monitorServiceServer ::
                        MonitorService HsGRPC.ServerRequest HsGRPC.ServerResponse ->
                          HsGRPC.ServiceOptions -> Hs.IO ()
 monitorServiceServer
-  MonitorService{monitorServiceGetHeartbeat =
-                   monitorServiceGetHeartbeat}
+  MonitorService{monitorServicePushMetrics =
+                   monitorServicePushMetrics}
   (ServiceOptions serverHost serverPort useCompression
      userAgentPrefix userAgentSuffix initialMetadata sslConfig logger
      serverMaxReceiveMessageLength serverMaxMetadataSize)
   = (HsGRPC.serverLoop
        HsGRPC.defaultOptions{HsGRPC.optNormalHandlers =
                                [(HsGRPC.UnaryHandler
-                                   (HsGRPC.MethodName "/monitor.MonitorService/GetHeartbeat")
+                                   (HsGRPC.MethodName "/monitor.MonitorService/PushMetrics")
                                    (HsGRPC.convertGeneratedServerHandler
-                                      monitorServiceGetHeartbeat))],
+                                      monitorServicePushMetrics))],
                              HsGRPC.optClientStreamHandlers = [],
                              HsGRPC.optServerStreamHandlers = [],
                              HsGRPC.optBiDiStreamHandlers = [], optServerHost = serverHost,
@@ -84,108 +84,147 @@ monitorServiceClient client
   = (Hs.pure MonitorService) <*>
       ((Hs.pure (HsGRPC.clientRequest client)) <*>
          (HsGRPC.clientRegisterMethod client
-            (HsGRPC.MethodName "/monitor.MonitorService/GetHeartbeat")))
+            (HsGRPC.MethodName "/monitor.MonitorService/PushMetrics")))
  
-data HeartbeatRequest = HeartbeatRequest{}
-                      deriving (Hs.Show, Hs.Eq, Hs.Ord, Hs.Generic, Hs.NFData)
+data PushMetricsRequest = PushMetricsRequest{pushMetricsRequestCpuLoad
+                                             :: Hs.Float,
+                                             pushMetricsRequestHttpLoad :: Hs.Float,
+                                             pushMetricsRequestPrivateDnsName :: Hs.Text}
+                        deriving (Hs.Show, Hs.Eq, Hs.Ord, Hs.Generic, Hs.NFData)
  
-instance HsProtobuf.Named HeartbeatRequest where
-        nameOf _ = (Hs.fromString "HeartbeatRequest")
+instance HsProtobuf.Named PushMetricsRequest where
+        nameOf _ = (Hs.fromString "PushMetricsRequest")
  
-instance HsProtobuf.HasDefault HeartbeatRequest
+instance HsProtobuf.HasDefault PushMetricsRequest
  
-instance HsProtobuf.Message HeartbeatRequest where
-        encodeMessage _ HeartbeatRequest{} = (Hs.mconcat [])
-        decodeMessage _ = (Hs.pure HeartbeatRequest)
-        dotProto _ = []
- 
-instance HsJSONPB.ToJSONPB HeartbeatRequest where
-        toJSONPB (HeartbeatRequest) = (HsJSONPB.object [])
-        toEncodingPB (HeartbeatRequest) = (HsJSONPB.pairs [])
- 
-instance HsJSONPB.FromJSONPB HeartbeatRequest where
-        parseJSONPB
-          = (HsJSONPB.withObject "HeartbeatRequest"
-               (\ obj -> (Hs.pure HeartbeatRequest)))
- 
-instance HsJSONPB.ToJSON HeartbeatRequest where
-        toJSON = HsJSONPB.toAesonValue
-        toEncoding = HsJSONPB.toAesonEncoding
- 
-instance HsJSONPB.FromJSON HeartbeatRequest where
-        parseJSON = HsJSONPB.parseJSONPB
- 
-instance HsJSONPB.ToSchema HeartbeatRequest where
-        declareNamedSchema _
-          = do Hs.return
-                 (HsJSONPB.NamedSchema{HsJSONPB._namedSchemaName =
-                                         Hs.Just "HeartbeatRequest",
-                                       HsJSONPB._namedSchemaSchema =
-                                         Hs.mempty{HsJSONPB._schemaParamSchema =
-                                                     Hs.mempty{HsJSONPB._paramSchemaType =
-                                                                 Hs.Just HsJSONPB.SwaggerObject},
-                                                   HsJSONPB._schemaProperties =
-                                                     HsJSONPB.insOrdFromList []}})
- 
-newtype HeartbeatOkResponse = HeartbeatOkResponse{heartbeatOkResponseResponse
-                                                  :: Hs.Text}
-                              deriving (Hs.Show, Hs.Eq, Hs.Ord, Hs.Generic, Hs.NFData)
- 
-instance HsProtobuf.Named HeartbeatOkResponse where
-        nameOf _ = (Hs.fromString "HeartbeatOkResponse")
- 
-instance HsProtobuf.HasDefault HeartbeatOkResponse
- 
-instance HsProtobuf.Message HeartbeatOkResponse where
+instance HsProtobuf.Message PushMetricsRequest where
         encodeMessage _
-          HeartbeatOkResponse{heartbeatOkResponseResponse =
-                                heartbeatOkResponseResponse}
+          PushMetricsRequest{pushMetricsRequestCpuLoad =
+                               pushMetricsRequestCpuLoad,
+                             pushMetricsRequestHttpLoad = pushMetricsRequestHttpLoad,
+                             pushMetricsRequestPrivateDnsName =
+                               pushMetricsRequestPrivateDnsName}
           = (Hs.mconcat
                [(HsProtobuf.encodeMessageField (HsProtobuf.FieldNumber 1)
-                   heartbeatOkResponseResponse)])
+                   pushMetricsRequestCpuLoad),
+                (HsProtobuf.encodeMessageField (HsProtobuf.FieldNumber 2)
+                   pushMetricsRequestHttpLoad),
+                (HsProtobuf.encodeMessageField (HsProtobuf.FieldNumber 3)
+                   pushMetricsRequestPrivateDnsName)])
         decodeMessage _
-          = (Hs.pure HeartbeatOkResponse) <*>
+          = (Hs.pure PushMetricsRequest) <*>
               (HsProtobuf.at HsProtobuf.decodeMessageField
                  (HsProtobuf.FieldNumber 1))
+              <*>
+              (HsProtobuf.at HsProtobuf.decodeMessageField
+                 (HsProtobuf.FieldNumber 2))
+              <*>
+              (HsProtobuf.at HsProtobuf.decodeMessageField
+                 (HsProtobuf.FieldNumber 3))
         dotProto _
           = [(HsProtobuf.DotProtoField (HsProtobuf.FieldNumber 1)
+                (HsProtobuf.Prim HsProtobuf.Float)
+                (HsProtobuf.Single "cpu_load")
+                []
+                ""),
+             (HsProtobuf.DotProtoField (HsProtobuf.FieldNumber 2)
+                (HsProtobuf.Prim HsProtobuf.Float)
+                (HsProtobuf.Single "http_load")
+                []
+                ""),
+             (HsProtobuf.DotProtoField (HsProtobuf.FieldNumber 3)
                 (HsProtobuf.Prim HsProtobuf.String)
-                (HsProtobuf.Single "response")
+                (HsProtobuf.Single "private_dns_name")
                 []
                 "")]
  
-instance HsJSONPB.ToJSONPB HeartbeatOkResponse where
-        toJSONPB (HeartbeatOkResponse f1)
-          = (HsJSONPB.object ["response" .= f1])
-        toEncodingPB (HeartbeatOkResponse f1)
-          = (HsJSONPB.pairs ["response" .= f1])
+instance HsJSONPB.ToJSONPB PushMetricsRequest where
+        toJSONPB (PushMetricsRequest f1 f2 f3)
+          = (HsJSONPB.object
+               ["cpu_load" .= f1, "http_load" .= f2, "private_dns_name" .= f3])
+        toEncodingPB (PushMetricsRequest f1 f2 f3)
+          = (HsJSONPB.pairs
+               ["cpu_load" .= f1, "http_load" .= f2, "private_dns_name" .= f3])
  
-instance HsJSONPB.FromJSONPB HeartbeatOkResponse where
+instance HsJSONPB.FromJSONPB PushMetricsRequest where
         parseJSONPB
-          = (HsJSONPB.withObject "HeartbeatOkResponse"
-               (\ obj -> (Hs.pure HeartbeatOkResponse) <*> obj .: "response"))
+          = (HsJSONPB.withObject "PushMetricsRequest"
+               (\ obj ->
+                  (Hs.pure PushMetricsRequest) <*> obj .: "cpu_load" <*>
+                    obj .: "http_load"
+                    <*> obj .: "private_dns_name"))
  
-instance HsJSONPB.ToJSON HeartbeatOkResponse where
+instance HsJSONPB.ToJSON PushMetricsRequest where
         toJSON = HsJSONPB.toAesonValue
         toEncoding = HsJSONPB.toAesonEncoding
  
-instance HsJSONPB.FromJSON HeartbeatOkResponse where
+instance HsJSONPB.FromJSON PushMetricsRequest where
         parseJSON = HsJSONPB.parseJSONPB
  
-instance HsJSONPB.ToSchema HeartbeatOkResponse where
+instance HsJSONPB.ToSchema PushMetricsRequest where
         declareNamedSchema _
-          = do let declare_response = HsJSONPB.declareSchemaRef
-               heartbeatOkResponseResponse <- declare_response Proxy.Proxy
-               let _ = Hs.pure HeartbeatOkResponse <*>
-                         HsJSONPB.asProxy declare_response
+          = do let declare_cpu_load = HsJSONPB.declareSchemaRef
+               pushMetricsRequestCpuLoad <- declare_cpu_load Proxy.Proxy
+               let declare_http_load = HsJSONPB.declareSchemaRef
+               pushMetricsRequestHttpLoad <- declare_http_load Proxy.Proxy
+               let declare_private_dns_name = HsJSONPB.declareSchemaRef
+               pushMetricsRequestPrivateDnsName <- declare_private_dns_name
+                                                     Proxy.Proxy
+               let _ = Hs.pure PushMetricsRequest <*>
+                         HsJSONPB.asProxy declare_cpu_load
+                         <*> HsJSONPB.asProxy declare_http_load
+                         <*> HsJSONPB.asProxy declare_private_dns_name
                Hs.return
                  (HsJSONPB.NamedSchema{HsJSONPB._namedSchemaName =
-                                         Hs.Just "HeartbeatOkResponse",
+                                         Hs.Just "PushMetricsRequest",
                                        HsJSONPB._namedSchemaSchema =
                                          Hs.mempty{HsJSONPB._schemaParamSchema =
                                                      Hs.mempty{HsJSONPB._paramSchemaType =
                                                                  Hs.Just HsJSONPB.SwaggerObject},
                                                    HsJSONPB._schemaProperties =
                                                      HsJSONPB.insOrdFromList
-                                                       [("response",
-                                                         heartbeatOkResponseResponse)]}})
+                                                       [("cpu_load", pushMetricsRequestCpuLoad),
+                                                        ("http_load", pushMetricsRequestHttpLoad),
+                                                        ("private_dns_name",
+                                                         pushMetricsRequestPrivateDnsName)]}})
+ 
+data PushMetricsOkResponse = PushMetricsOkResponse{}
+                           deriving (Hs.Show, Hs.Eq, Hs.Ord, Hs.Generic, Hs.NFData)
+ 
+instance HsProtobuf.Named PushMetricsOkResponse where
+        nameOf _ = (Hs.fromString "PushMetricsOkResponse")
+ 
+instance HsProtobuf.HasDefault PushMetricsOkResponse
+ 
+instance HsProtobuf.Message PushMetricsOkResponse where
+        encodeMessage _ PushMetricsOkResponse{} = (Hs.mconcat [])
+        decodeMessage _ = (Hs.pure PushMetricsOkResponse)
+        dotProto _ = []
+ 
+instance HsJSONPB.ToJSONPB PushMetricsOkResponse where
+        toJSONPB (PushMetricsOkResponse) = (HsJSONPB.object [])
+        toEncodingPB (PushMetricsOkResponse) = (HsJSONPB.pairs [])
+ 
+instance HsJSONPB.FromJSONPB PushMetricsOkResponse where
+        parseJSONPB
+          = (HsJSONPB.withObject "PushMetricsOkResponse"
+               (\ obj -> (Hs.pure PushMetricsOkResponse)))
+ 
+instance HsJSONPB.ToJSON PushMetricsOkResponse where
+        toJSON = HsJSONPB.toAesonValue
+        toEncoding = HsJSONPB.toAesonEncoding
+ 
+instance HsJSONPB.FromJSON PushMetricsOkResponse where
+        parseJSON = HsJSONPB.parseJSONPB
+ 
+instance HsJSONPB.ToSchema PushMetricsOkResponse where
+        declareNamedSchema _
+          = do Hs.return
+                 (HsJSONPB.NamedSchema{HsJSONPB._namedSchemaName =
+                                         Hs.Just "PushMetricsOkResponse",
+                                       HsJSONPB._namedSchemaSchema =
+                                         Hs.mempty{HsJSONPB._schemaParamSchema =
+                                                     Hs.mempty{HsJSONPB._paramSchemaType =
+                                                                 Hs.Just HsJSONPB.SwaggerObject},
+                                                   HsJSONPB._schemaProperties =
+                                                     HsJSONPB.insOrdFromList []}})

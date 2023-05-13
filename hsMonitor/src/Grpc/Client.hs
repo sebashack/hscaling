@@ -4,15 +4,17 @@
 
 module Grpc.Client (
     MonitorResponse (..),
-    getHeartbeat,
+    pushMetrics,
     runActions,
 ) where
 
 import Data.ByteString.Internal (packChars)
+import Data.Text as TS (Text)
+import Data.Text.Lazy as TL
 import Grpc.Protobuf.Monitor (
-    HeartbeatOkResponse (..),
-    HeartbeatRequest (..),
     MonitorService (..),
+    PushMetricsOkResponse (..),
+    PushMetricsRequest (..),
     monitorServiceClient,
  )
 import Network.GRPC.HighLevel.Client (Client)
@@ -27,13 +29,14 @@ import Network.GRPC.HighLevel.Generated (
 
 data MonitorResponse a = OkResponse a | ErrResponse String deriving (Show)
 
-getHeartbeat :: Int -> Client -> IO (MonitorResponse ())
-getHeartbeat reqTimeoutSecs client = do
-    let req = ClientNormalRequest HeartbeatRequest reqTimeoutSecs []
-    endpoint <- monitorServiceGetHeartbeat <$> monitorServiceClient client
-    result <- endpoint req
+pushMetrics :: Float -> Float -> TS.Text -> Int -> Client -> IO (MonitorResponse ())
+pushMetrics cpuLoad httpLoad privateDNSName reqTimeoutSecs client = do
+    let pushReq = PushMetricsRequest cpuLoad httpLoad (TL.fromStrict privateDNSName)
+        clientReq = ClientNormalRequest pushReq reqTimeoutSecs []
+    endpoint <- monitorServicePushMetrics <$> monitorServiceClient client
+    result <- endpoint clientReq
     return $ case result of
-        ClientNormalResponse (HeartbeatOkResponse _) _meta1 _meta2 _status _details -> OkResponse ()
+        ClientNormalResponse PushMetricsOkResponse _meta1 _meta2 _status _details -> OkResponse ()
         ClientErrorResponse err -> ErrResponse $ show err
 
 runActions :: String -> Int -> (Client -> IO a) -> IO a
