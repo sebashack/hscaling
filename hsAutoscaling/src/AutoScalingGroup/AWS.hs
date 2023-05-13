@@ -3,7 +3,8 @@
 
 module AutoScalingGroup.AWS (runInstance, terminateInstance) where
 
-import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceId, InstanceInfo (..))
+import Data.Text.Lazy as LT (toStrict)
+import Data.Aeson.Text (encodeToLazyText)
 import Control.Lens.Getter (view)
 import Control.Lens.Operators ((.~))
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -16,7 +17,6 @@ import Control.Monad.Trans.AWS (
  )
 import Control.Monad.Trans.Resource (ResourceT)
 import Data.Function ((&))
-import Data.Text as T
 import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.UUID (toText)
 import Data.UUID.V4 (nextRandom)
@@ -44,13 +44,15 @@ import Network.AWS.EC2.Types (
  )
 import qualified Network.AWS.Env as AWS
 
+import AutoScalingGroup.Env (EC2Opts (..), Env (..), InstanceId, InstanceInfo (..))
+
 runInstance :: (MonadReader Env m, MonadIO m) => m InstanceInfo
 runInstance = do
     conf <- asks ec2Conf
     uuid <- liftIO $ fmap toText nextRandom
-    host <- asks appHost
-    port <- asks appPort
+    monConf <- asks monitorConf
     let instanceName = namePrefix conf <> "-" <> uuid
+        monConfTxt = (LT.toStrict . encodeToLazyText) monConf
         req =
             runInstances 1 1
                 & risInstanceType .~ Just (instanceType conf)
@@ -59,7 +61,7 @@ runInstance = do
                 & risSubnetId .~ Just (subnetId conf)
                 & risSecurityGroupIds .~ (securityGroups conf)
                 & risTagSpecifications .~ [tags instanceName]
-                & risUserData .~ Just (encodeBase64 $ launchScript host port)
+                & risUserData .~ Just (encodeBase64 $ launchScript monConfTxt)
     env <- asks awsEnv
     res <- runAWSAction env (send req)
     let runningInstance = Prelude.head $ view rInstances res
@@ -68,7 +70,7 @@ runInstance = do
         dnsName = view insPrivateDNSName runningInstance
     return InstanceInfo{privateIp = ipAddr, instanceId = insId, privateDNSName = dnsName}
   where
-    launchScript host port = "#!/bin/bash\necho " <> host <> ":" <> (T.pack $ show port) <> " > /opt/asg_server"
+    launchScript conf = "#!/bin/bash\necho '" <> conf <> "' > /opt/monitor_config.json"
     --
     tags instanceName =
         tagSpecification

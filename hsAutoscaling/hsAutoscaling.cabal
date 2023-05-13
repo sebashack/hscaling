@@ -78,6 +78,7 @@ executable hsAutoscaling-exe
       base >=4.7 && <5
     , hsAutoscaling
     , optparse-applicative
+    , text
     , yaml
   default-language: Haskell2010
 

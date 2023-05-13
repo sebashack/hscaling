@@ -43,7 +43,7 @@ import Control.Monad.Trans.AWS (
  )
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
-import Data.Aeson (FromJSON (..), withText)
+import Data.Aeson (FromJSON (..), ToJSON (..), withText)
 import Data.ByteString.Builder (toLazyByteString)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -70,16 +70,26 @@ import AutoScalingGroup.CRUD (enableForeignKeys)
 data Opts = Opts
     { awsOpts :: AwsOpts
     , pingOpts :: PingOpts
-    , host :: Text
-    , port :: Word16
     , minInstances :: Word16
     , maxInstances :: Word16
     , dbPath :: FilePath
     , logLevel :: TL.Level
+    , monitorOpts :: MonitorOpts
     }
     deriving (Show, Generic)
 
 instance FromJSON Opts
+
+data MonitorOpts = MonitorOpts
+    { asgServerHost :: String
+    , asgServerPort :: Int
+    , samplingLambda :: Float
+    , pushFrequencySecs :: Int
+    }
+    deriving (Show, Generic)
+
+instance FromJSON MonitorOpts
+instance ToJSON MonitorOpts
 
 data PingOpts = PingOpts
     { responseTimeoutSecs :: Word8
@@ -136,8 +146,7 @@ data Env = Env
     , awsEnv :: AWS.Env
     , ec2Conf :: EC2Opts
     , pingEnv :: PingOpts
-    , appHost :: Text
-    , appPort :: Word16
+    , monitorConf :: MonitorOpts
     , appLogger :: TL.Logger
     , appLogLevel :: TL.Level
     }
@@ -175,9 +184,8 @@ mkEnv opts = do
             , awsEnv = env
             , pingEnv = pingOpts opts
             , ec2Conf = ec2Opts $ awsOpts opts
+            , monitorConf = monitorOpts opts
             , appLogger = logger
-            , appHost = host opts
-            , appPort = port opts
             , appLogLevel = logLevel opts
             }
   where

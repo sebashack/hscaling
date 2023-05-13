@@ -76,6 +76,7 @@ executables:
     - hsAutoscaling
     - optparse-applicative
     - yaml
+    - text
 
 tests:
   hsAutoscaling-test:
