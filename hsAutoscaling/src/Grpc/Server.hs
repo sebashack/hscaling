@@ -28,7 +28,7 @@ import Network.GRPC.HighLevel.Generated (
  )
 
 import AutoScalingGroup.CRUD (
-    Instance (privateDNSName),
+    Instance (privateIp),
     insertMetric,
     selectInstanceByDNSName,
  )
@@ -45,10 +45,11 @@ getMetricsHandler conn (ServerNormalRequest _metadata (PushMetricsRequest cpuLoa
     maybeIns <- selectInstanceByDNSName conn (TL.toStrict dnsName)
     case maybeIns of
         Just ins -> do
-            insertMetric conn (privateDNSName ins) cpuLoad httpLoad
+            insertMetric conn (privateIp ins) cpuLoad httpLoad
+            putStrLn (">>>>>>> inserting metric for instance " <> (TL.unpack dnsName))
             return $ ServerNormalResponse PushMetricsOkResponse [] StatusOk "Status ok"
         Nothing -> do
-            putStrLn ("Non-registered instance wth dnsName " <> (TL.unpack dnsName))
+            putStrLn (">>>>>>> WARNING: non-registered instance wth dnsName " <> (TL.unpack dnsName))
             return $ ServerNormalResponse PushMetricsOkResponse [] StatusNotFound "Instance not found"
 
 runServer :: Connection -> String -> Int -> IO ()

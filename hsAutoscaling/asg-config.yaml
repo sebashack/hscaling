@@ -1,8 +1,11 @@
-host: 127.0.0.1
-port: 50001
 minInstances: 1
 maxInstances: 5
 dbPath: ./db/test-monitor.db
+monitorOpts:
+  asgServerHost: 127.0.0.1
+  asgServerPort: 50001
+  samplingLambda: 6.5
+  pushFrequencySecs: 10
 pingOpts:
   responseTimeoutSecs: 3
   responseCount: 3
