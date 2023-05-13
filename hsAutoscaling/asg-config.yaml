@@ -2,6 +2,8 @@ minInstances: 1
 maxInstances: 5
 balancingFrequencySecs: 20
 dbPath: ./db/test-monitor.db
+httpMaxLoadPercentage: 70
+cpuMaxLoadPercentage: 70
 monitorOpts:
   asgServerHost: 127.0.0.1
   asgServerPort: 50001

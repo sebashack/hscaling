@@ -74,6 +74,8 @@ data Opts = Opts
     , dbPath :: FilePath
     , logLevel :: TL.Level
     , monitorOpts :: MonitorOpts
+    , httpMaxLoadPercentage :: Maybe Float
+    , cpuMaxLoadPercentage :: Maybe Float
     }
     deriving (Show, Generic)
 
@@ -138,6 +140,8 @@ data Env = Env
     , ec2Conf :: EC2Opts
     , pingConf :: PingOpts
     , monitorConf :: MonitorOpts
+    , appHttpMaxLoadPercentage :: Maybe Float
+    , appCpuMaxLoadPercentage :: Maybe Float
     , appMinInstances :: Word16
     , appMaxInstances :: Word16
     , appBalancingFrequency :: Word16
@@ -184,6 +188,8 @@ mkEnv opts = do
             , appBalancingFrequency = balancingFrequencySecs opts
             , appLogger = logger
             , appLogLevel = logLevel opts
+            , appHttpMaxLoadPercentage = httpMaxLoadPercentage opts
+            , appCpuMaxLoadPercentage = cpuMaxLoadPercentage opts
             }
   where
     mkLogger :: TL.Level -> IO TL.Logger

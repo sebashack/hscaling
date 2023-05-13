@@ -29,6 +29,7 @@ library
       AutoScalingGroup.CRUD
       AutoScalingGroup.Env
       AutoScalingGroup.Ping
+      AutoScalingGroup.Scaling
       Grpc.Protobuf.Monitor
       Grpc.Server
   other-modules:

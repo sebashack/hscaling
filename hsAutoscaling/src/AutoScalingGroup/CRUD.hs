@@ -34,8 +34,8 @@ import Text.RawString.QQ
 
 data InstanceMetrics = InstanceMetrics
     { instanceId :: Text
-    , cpuLoadPercentage :: Double
-    , httpLoadPercentage :: Double
+    , cpuLoadPercentage :: Float
+    , httpLoadPercentage :: Float
     , createdAt :: UTCTime
     }
     deriving (Eq, Show)
