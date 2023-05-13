@@ -40,8 +40,12 @@ library:
   - containers
   - deepseq
   - grpc-haskell
+  - mwc-random
+  - primitive
   - proto3-suite
   - proto3-wire
+  - random-fu
+  - shelly
   - text
   - vector
 
