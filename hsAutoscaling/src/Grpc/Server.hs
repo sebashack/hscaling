@@ -28,17 +28,23 @@ import Network.GRPC.HighLevel.Generated (
     defaultServiceOptions,
  )
 
+import Database.SQLite.Simple (Connection)
+
+import AutoScalingGroup.CRUD (selectInstanceByDNSName, insertMetric)
+
 handlers :: MonitorService ServerRequest ServerResponse
 handlers =
     MonitorService
         { monitorServicePushMetrics = getMetricsHandler
         }
 
-getMetricsHandler :: ServerRequest 'Normal PushMetricsRequest PushMetricsOkResponse -> IO (ServerResponse 'Normal PushMetricsOkResponse)
-getMetricsHandler (ServerNormalRequest _metadata (PushMetricsRequest cpuLoad httpLoad dnsName)) = do
-    liftIO $ print ("CPU LOAD = " <> show cpuLoad)
-    liftIO $ print ("HTTP LOAD = " <> show httpLoad)
-    liftIO $ print ("DNS NAME = " <> show dnsName)
+getMetricsHandler :: Connection -> ServerRequest 'Normal PushMetricsRequest PushMetricsOkResponse -> IO (ServerResponse 'Normal PushMetricsOkResponse)
+getMetricsHandler conn (ServerNormalRequest _metadata (PushMetricsRequest cpuLoad httpLoad dnsName)) = do
+    instance_id = selectInstanceByDNSName conn dnsName
+    insertMetric conn instance_id cpuLoad httpLoad
+    --liftIO $ print ("CPU LOAD = " <> show cpuLoad)
+    --liftIO $ print ("HTTP LOAD = " <> show httpLoad)
+    --liftIO $ print ("DNS NAME = " <> show dnsName)
     return $ ServerNormalResponse PushMetricsOkResponse [] StatusOk "Status ok"
 
 runServer :: String -> Int -> IO ()
