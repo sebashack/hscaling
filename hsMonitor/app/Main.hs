@@ -18,5 +18,6 @@ main = do
         httpLoad <- sampleLoad (seed env) (rvar env)
         putStrLn (">>>>>>> http-load = " <> show httpLoad)
         putStrLn (">>>>>>> cpu-load = " <> show cpuLoad)
+        putStrLn ">>>>>>>"
         void $ pushMetrics cpuLoad httpLoad (privateDNSName env) 5 client
         threadDelay (pushFrequency env * 1000000)
