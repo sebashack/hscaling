@@ -86,7 +86,7 @@ runInstance = do
         dnsName = view insPrivateDNSName runningInstance
     return InstanceInfo{privateIp = fromJust ipAddr, instanceId = insId, privateDNSName = fromJust dnsName}
   where
-    launchScript conf = "#!/bin/bash\necho '" <> conf <> "' > /opt/monitor_config.json"
+    launchScript conf = "#!/bin/bash\nrm -f /opt/monitor_config.json\necho '" <> conf <> "' > /opt/monitor_config.json"
     --
     tags instanceName =
         tagSpecification
