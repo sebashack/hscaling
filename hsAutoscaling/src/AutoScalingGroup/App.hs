@@ -21,7 +21,7 @@ runApp env = do
         scaleAction' = liftIO (threadDelay scaleDelay) >> scaleAction
     void $ (runASGAction env $ actionE initializeInstances)
     putStrLn "Waiting for instances to intiailize ..."
-    threadDelay 60000000
+    threadDelay (appInitDelay env * 1000000)
     void $ forkIO (runASGAction env $ actionE $ forever pingAction')
     void $ forkIO (runASGAction env $ actionE $ forever scaleAction')
     runServer (dbConn env) (appGrpcHost env) (appGrpcPort env)

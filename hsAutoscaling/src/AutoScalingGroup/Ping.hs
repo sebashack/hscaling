@@ -37,9 +37,9 @@ pingOrRun ins = do
     count' <- asks (responseCount . pingConf)
     isAlive <- liftIO $ ping (IN.privateIp ins) timeout count'
     if isAlive
-        then logText (">>>>>>>>> instance '" <> IN.privateIp ins <> "' is ALIVE")
+        then logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is ALIVE")
         else do
-            logText (">>>>>>>>> instance '" <> IN.privateIp ins <> "' is DEAD")
+            logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is DEAD")
             terminateInstance $ IN.instanceId ins
             conn <- asks dbConn
             currentCount <- liftIO $ selectInstanceCount conn

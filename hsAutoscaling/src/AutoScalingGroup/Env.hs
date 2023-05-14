@@ -71,6 +71,7 @@ data Opts = Opts
     , awsOpts :: AwsOpts
     , pingOpts :: PingOpts
     , balancingFrequencySecs :: Int
+    , initializationDelaySecs :: Int
     , minInstances :: Word16
     , maxInstances :: Word16
     , dbPath :: FilePath
@@ -147,6 +148,7 @@ data Env = Env
     , appMinInstances :: Word16
     , appMaxInstances :: Word16
     , appBalancingFrequency :: Int
+    , appInitDelay :: Int
     , appGrpcHost :: String
     , appGrpcPort :: Int
     , appLogger :: TL.Logger
@@ -192,6 +194,7 @@ mkEnv opts = do
             , appBalancingFrequency = balancingFrequencySecs opts
             , appLogger = logger
             , appLogLevel = logLevel opts
+            , appInitDelay = initializationDelaySecs opts
             , appGrpcHost = grpcHost opts
             , appGrpcPort = grpcPort opts
             , appHttpMaxLoadPercentage = httpMaxLoadPercentage opts
