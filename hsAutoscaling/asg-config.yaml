@@ -2,7 +2,6 @@ grpcHost: 127.0.0.1
 grpcPort: 50001
 minInstances: 1
 maxInstances: 5
-initializationDelaySecs: 30
 balancingFrequencySecs: 20
 dbPath: ./db/test-monitor.db
 httpMaxLoadPercentage: 70
@@ -16,6 +15,7 @@ pingOpts:
   responseTimeoutSecs: 3
   responseCount: 3
   pingFrequencySecs: 2
+  pingIgnoreSpanSecs: 120
 awsOpts:
   awsRegion: us-east-1
   accessKey: xxxx

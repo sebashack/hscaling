@@ -2,7 +2,6 @@
 
 module AutoScalingGroup.Ping (pingAction) where
 
-import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async.Lifted (mapConcurrently_)
 import Control.Monad (void)
 import Control.Monad.IO.Class (liftIO)
@@ -50,8 +49,6 @@ pingOrRun ins = do
                     info <- runInstance
                     liftIO $ insertInstance conn (INF.instanceId info) (INF.privateIp info) (INF.privateDNSName info)
                     liftIO $ deleteInstance conn (IN.instanceId ins)
-                    initDelay <- asks appInitDelay
-                    liftIO $ threadDelay (initDelay * 1000000)
                 else liftIO $ deleteInstance conn (IN.instanceId ins)
   where
     ping :: Text -> Word8 -> Word8 -> IO Bool

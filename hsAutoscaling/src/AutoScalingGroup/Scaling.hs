@@ -2,7 +2,6 @@
 
 module AutoScalingGroup.Scaling (scaleAction, initializeInstances) where
 
-import Control.Concurrent (threadDelay)
 import Control.Monad (replicateM_)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (asks)
@@ -50,8 +49,6 @@ scaleDownOrUp m = do
         (True, False) -> do
             info <- runInstance
             liftIO $ insertInstance conn (INF.instanceId info) (INF.privateIp info) (INF.privateDNSName info)
-            initDelay <- asks appInitDelay
-            liftIO $ threadDelay (initDelay * 1000000)
         (False, True) -> do
             terminateInstance $ IM.instanceId m
             liftIO $ deleteInstance conn (IM.instanceId m)
