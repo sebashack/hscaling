@@ -2,7 +2,7 @@ module AutoScalingGroup.App (runApp) where
 
 import AutoScalingGroup.Env (Env (..), actionE, runASGAction)
 import AutoScalingGroup.Ping (pingAction)
-import AutoScalingGroup.Scaling (scaleAction, initializeInstances)
+import AutoScalingGroup.Scaling (initializeInstances, scaleAction)
 import Control.Concurrent (forkIO)
 import Control.Monad (forever, void)
 import Grpc.Server (runServer)

@@ -20,7 +20,7 @@ import AutoScalingGroup.CRUD (
     selectInstances,
  )
 import AutoScalingGroup.CRUD as IN (Instance (..))
-import AutoScalingGroup.Env (ASGActionE, Env (..), PingOpts (..))
+import AutoScalingGroup.Env (ASGActionE, Env (..), PingOpts (..), logText)
 
 pingAction :: ASGActionE ()
 pingAction = do
@@ -37,8 +37,9 @@ pingOrRun ins = do
     count' <- asks (responseCount . pingConf)
     isAlive <- liftIO $ ping (IN.privateIp ins) timeout count'
     if isAlive
-        then return ()
+        then logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is ALIVE")
         else do
+            logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is DEAD")
             terminateInstance $ IN.instanceId ins
             conn <- asks dbConn
             currentCount <- liftIO $ selectInstanceCount conn

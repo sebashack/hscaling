@@ -84,10 +84,8 @@ runInstance = do
         insId = view insInstanceId runningInstance
         ipAddr = view insPrivateIPAddress runningInstance
         dnsName = view insPrivateDNSName runningInstance
-    return InstanceInfo{privateIp = fromJust' ipAddr, instanceId = insId, privateDNSName = fromJust' dnsName}
+    return InstanceInfo{privateIp = fromJust ipAddr, instanceId = insId, privateDNSName = fromJust dnsName}
   where
-    fromJust' = fromJust (error "Instance without private-ip")
-    --
     launchScript conf = "#!/bin/bash\necho '" <> conf <> "' > /opt/monitor_config.json"
     --
     tags instanceName =
