@@ -7,6 +7,7 @@ import Control.Monad (void)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (asks)
 import Data.Text as T
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Data.Word (Word8)
 import Shelly (errExit, lastExitCode, run, shelly, silently)
 
@@ -33,23 +34,30 @@ pingAction = do
 --
 pingOrRun :: Instance -> ASGActionE ()
 pingOrRun ins = do
-    timeout <- asks (responseTimeoutSecs . pingConf)
-    count' <- asks (responseCount . pingConf)
-    isAlive <- liftIO $ ping (IN.privateIp ins) timeout count'
-    if isAlive
-        then logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is ALIVE")
-        else do
-            logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is DEAD")
-            terminateInstance $ IN.instanceId ins
-            conn <- asks dbConn
-            currentCount <- liftIO $ selectInstanceCount conn
-            minCount <- asks appMinInstances
-            if currentCount - 1 < fromIntegral minCount
-                then do
-                    info <- runInstance
-                    liftIO $ insertInstance conn (INF.instanceId info) (INF.privateIp info) (INF.privateDNSName info)
-                    liftIO $ deleteInstance conn (IN.instanceId ins)
-                else liftIO $ deleteInstance conn (IN.instanceId ins)
+    now <- liftIO getCurrentTime
+    let diff = diffUTCTime now (IN.createdAt ins)
+    ignoreSpan <- asks (pingIgnoreSpanSecs . pingConf)
+    if diff > fromIntegral ignoreSpan
+        then do
+            timeout <- asks (responseTimeoutSecs . pingConf)
+            count' <- asks (responseCount . pingConf)
+            isAlive <- liftIO $ ping (IN.privateIp ins) timeout count'
+
+            if isAlive
+                then logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is ALIVE")
+                else do
+                    logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is DEAD")
+                    terminateInstance $ IN.instanceId ins
+                    conn <- asks dbConn
+                    currentCount <- liftIO $ selectInstanceCount conn
+                    minCount <- asks appMinInstances
+                    if currentCount - 1 < fromIntegral minCount
+                        then do
+                            info <- runInstance
+                            liftIO $ insertInstance conn (INF.instanceId info) (INF.privateIp info) (INF.privateDNSName info)
+                            liftIO $ deleteInstance conn (IN.instanceId ins)
+                        else liftIO $ deleteInstance conn (IN.instanceId ins)
+        else logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is INITIALIZING")
   where
     ping :: Text -> Word8 -> Word8 -> IO Bool
     ping host resTimeout resCount = shelly $ silently $ do

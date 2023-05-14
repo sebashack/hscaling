@@ -1,5 +1,5 @@
 grpcHost: 127.0.0.1
-grpcPort: 50001
+grpcPort: 50051
 minInstances: 1
 maxInstances: 5
 balancingFrequencySecs: 20
@@ -8,7 +8,7 @@ httpMaxLoadPercentage: 70
 cpuMaxLoadPercentage: 70
 monitorOpts:
   asgServerHost: 127.0.0.1
-  asgServerPort: 50001
+  asgServerPort: 50051
   samplingLambda: 6.5
   pushFrequencySecs: 10
 pingOpts:
