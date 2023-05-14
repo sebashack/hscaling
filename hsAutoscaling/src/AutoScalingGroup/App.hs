@@ -20,7 +20,7 @@ runApp env = do
         pingAction' = liftIO (threadDelay pingDelay) >> pingAction
         scaleAction' = liftIO (threadDelay scaleDelay) >> scaleAction
     void $ (runASGAction env $ actionE initializeInstances)
-    putStrLn "Waiting for instances to intiailize ..."
+    putStrLn (">>>>>>>>> waiting " <> show (appInitDelay env) <> " sec(s) for instances to intiailize ...")
     threadDelay (appInitDelay env * 1000000)
     void $ forkIO (runASGAction env $ actionE $ forever pingAction')
     void $ forkIO (runASGAction env $ actionE $ forever scaleAction')
