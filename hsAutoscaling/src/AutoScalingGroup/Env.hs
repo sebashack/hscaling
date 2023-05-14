@@ -70,7 +70,7 @@ data Opts = Opts
     , grpcPort :: Int
     , awsOpts :: AwsOpts
     , pingOpts :: PingOpts
-    , balancingFrequencySecs :: Word16
+    , balancingFrequencySecs :: Int
     , minInstances :: Word16
     , maxInstances :: Word16
     , dbPath :: FilePath
@@ -97,7 +97,7 @@ instance ToJSON MonitorOpts
 data PingOpts = PingOpts
     { responseTimeoutSecs :: Word8
     , responseCount :: Word8
-    , pingFrequencySecs :: Word16
+    , pingFrequencySecs :: Int
     }
     deriving (Show, Generic)
 
@@ -146,7 +146,7 @@ data Env = Env
     , appCpuMaxLoadPercentage :: Maybe Float
     , appMinInstances :: Word16
     , appMaxInstances :: Word16
-    , appBalancingFrequency :: Word16
+    , appBalancingFrequency :: Int
     , appGrpcHost :: String
     , appGrpcPort :: Int
     , appLogger :: TL.Logger
