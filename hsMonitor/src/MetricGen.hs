@@ -21,5 +21,5 @@ genRandomVar lambda = poisson lambda
 sampleLoad :: Seed -> RVar Int -> IO Float
 sampleLoad seed rvar = do
     v <- sampleFrom seed rvar
-    let r = (fromIntegral v :: Float) / 10.0
-    return $ if r > 1.0 then 1.0 else r
+    let r = (fromIntegral v :: Float) * 10
+    return $ if r > 100.0 then 100.0 else r
