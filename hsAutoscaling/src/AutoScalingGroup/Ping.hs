@@ -41,10 +41,10 @@ pingOrRun ins = do
     now <- liftIO getCurrentTime
     let diff = diffUTCTime now (IN.createdAt ins)
     case (diff > fromIntegral ignoreSpan, isAlive) of
-        (_, True) -> logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is ALIVE")
+        (_, True) -> logText ("ping: instance '" <> IN.instanceId ins <> "' is ALIVE")
         (False, _) -> return ()
         (True, False) -> do
-            logText (">>>>>>>>> instance '" <> IN.instanceId ins <> "' is DEAD")
+            logText ("ping: instance '" <> IN.instanceId ins <> "' is DEAD")
             terminateInstance $ IN.instanceId ins
             conn <- asks dbConn
             currentCount <- liftIO $ selectInstanceCount conn

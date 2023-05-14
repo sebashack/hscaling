@@ -33,10 +33,10 @@ scaleAction :: ASGActionE ()
 scaleAction = do
     conn <- asks dbConn
     metricss <- liftIO $ selectInstanceMetrics conn
-    mapM_ scaleDownOrUp metricss
+    mapM_ scaleUpOrDown metricss
 
-scaleDownOrUp :: InstanceMetrics -> ASGActionE ()
-scaleDownOrUp m = do
+scaleUpOrDown :: InstanceMetrics -> ASGActionE ()
+scaleUpOrDown m = do
     maybeMaxCpuLoad <- asks appHttpMaxLoadPercentage
     maybeMaxHttpLoad <- asks appCpuMaxLoadPercentage
     minCount <- asks appMinInstances
@@ -49,11 +49,13 @@ scaleDownOrUp m = do
         (True, False) -> do
             info <- runInstance
             liftIO $ insertInstance conn (INF.instanceId info) (INF.privateIp info) (INF.privateDNSName info)
+            logText "scale: scaling up ..."
         (False, True) -> do
             terminateInstance $ IM.instanceId m
             liftIO $ deleteInstance conn (IM.instanceId m)
+            logText "scale: scaling down ..."
         (False, False) -> return ()
-        (True, True) -> logText "WARNING: both scale-up and scale-down conditions are True"
+        (True, True) -> logText "scale-WARNING: both scale-up and scale-down conditions are True"
   where
     shouldScaleUp :: Int -> Int -> Maybe Float -> Maybe Float -> Bool
     shouldScaleUp currentCount maxCount maybeMaxCpuLoad maybeMaxHttpLoad =
