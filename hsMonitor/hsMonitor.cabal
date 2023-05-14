@@ -51,7 +51,7 @@ library
     , vector
   default-language: Haskell2010
 
-executable hsMonitor-exe
+executable hsmonitor
   main-is: Main.hs
   other-modules:
       Paths_hsMonitor
