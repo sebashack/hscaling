@@ -3,10 +3,10 @@
 module Main (main) where
 
 import Control.Concurrent (threadDelay)
-import Control.Monad (forever, void)
+import Control.Monad (forever)
 
 import Env (Env (..), mkEnv)
-import Grpc.Client (pushMetrics, runActions)
+import Grpc.Client (MonitorResponse (..), pushMetrics, runActions)
 import MetricGen (sampleLoad)
 
 main :: IO ()
@@ -19,5 +19,8 @@ main = do
         putStrLn (">>>>>>> http-load = " <> show httpLoad)
         putStrLn (">>>>>>> cpu-load = " <> show cpuLoad)
         putStrLn ">>>>>>>"
-        void $ pushMetrics cpuLoad httpLoad (privateDNSName env) 5 client
+        res <- pushMetrics cpuLoad httpLoad (privateDNSName env) 5 client
+        case res of
+            OkResponse _ -> putStrLn "ok response"
+            ErrResponse err -> putStrLn ("error response: " <> err)
         threadDelay (pushFrequency env * 1000000)
