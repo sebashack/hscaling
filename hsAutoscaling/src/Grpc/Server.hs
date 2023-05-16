@@ -46,7 +46,14 @@ getMetricsHandler conn (ServerNormalRequest _metadata (PushMetricsRequest cpuLoa
     case maybeIns of
         Just ins -> do
             insertMetric conn (instanceId ins) cpuLoad httpLoad
-            putStrLn (">>>>>>> inserting metric for instance " <> (TL.unpack dnsName))
+            putStrLn
+                ( ">>>>>>> inserting metrics for instance "
+                    <> (TL.unpack dnsName)
+                    <> ": cpu-load "
+                    <> show cpuLoad
+                    <> ", http-load "
+                    <> show httpLoad
+                )
             return $ ServerNormalResponse PushMetricsOkResponse [] StatusOk "Status ok"
         Nothing -> do
             putStrLn (">>>>>>> WARNING: non-registered instance wth dnsName " <> (TL.unpack dnsName))
@@ -56,5 +63,5 @@ runServer :: Connection -> String -> Int -> IO ()
 runServer conn host port =
     let options = defaultServiceOptions{serverHost = Host $ packChars host, serverPort = Port port}
      in do
-        putStrLn ("Running grpc server on " <> host <> ":" <> show port)
-        monitorServiceServer (handlers conn) options
+            putStrLn ("Running grpc server on " <> host <> ":" <> show port)
+            monitorServiceServer (handlers conn) options
