@@ -433,3 +433,11 @@ After deployment we checked that Apache was serving the example web page:
 
 
 ![apache](assets/apache.png)
+
+
+## 5) References
+
+- https://hackage.haskell.org/package/proto3-suite
+- https://hackage.haskell.org/package/amazonka-ec2
+- https://hackage.haskell.org/package/grpc-haskell
+- https://hackage.haskell.org/package/statistics-0.16.2.0/docs/Statistics-Distribution-Poisson.html
