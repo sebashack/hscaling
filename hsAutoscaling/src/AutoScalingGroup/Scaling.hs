@@ -37,8 +37,8 @@ scaleAction = do
 
 scaleUpOrDown :: InstanceMetrics -> ASGActionE ()
 scaleUpOrDown m = do
-    maybeMaxCpuLoad <- asks appHttpMaxLoadPercentage
-    maybeMaxHttpLoad <- asks appCpuMaxLoadPercentage
+    maybeMaxCpuLoad <- asks appCpuMaxLoadPercentage
+    maybeMaxHttpLoad <- asks appHttpMaxLoadPercentage
     minCount <- asks appMinInstances
     maxCount <- asks appMaxInstances
     conn <- asks dbConn
