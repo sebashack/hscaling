@@ -242,9 +242,9 @@ where,
     - `pingIgnoreSpanSecs`: A span of time in seconds during which health check pings are ignored. It is set to `120`.
 11. `awsOpts`: Options related to Amazon Web Services (AWS) functionality. It includes the following sub-fields:
    - `awsRegion`: The AWS region where the autoscaling service operates. Here, it is set to `us-east-1`.
-   - `accessKey`: The access key used for authenticating with AWS services. The actual key is masked with "xxxx".
-   - `secretKey`: The secret key associated with the access key for authentication. The actual key is masked with "xxxx".
-   - `sessionToken`: An optional session token for temporary credentials. The actual token is masked with "xxxx".
+   - `accessKey`: The access key used for authenticating with AWS services.
+   - `secretKey`: The secret key associated with the access key for authentication.
+   - `sessionToken`: An optional session token for temporary credentials.
    - `ec2Opts`: Additional options for the EC2 instances created by the autoscaling service. It includes the following sub-fields:
      - `amiId`: The ID of the Amazon Machine Image (AMI) used for launching EC2 instances. Here, it is set to `ami-0557a15b87f6559cf`.
      - `securityGroups`: A list of security group IDs associated with the EC2 instances. Here, it includes three security group IDs.
@@ -301,7 +301,7 @@ this configuration file looks like the following:
 
 where,
 
-1. `samplingLambda`: it's value that sets the average cases for out Poisson distribution.
+1. `samplingLambda`: It's value that sets the average cases for out Poisson distribution.
 
 2. `pushFrequencySecs`: The It represents the frequency in seconds at which the monitor client sends metrics to the autoscaling server.
 
