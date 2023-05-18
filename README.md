@@ -255,7 +255,7 @@ where,
 10. `logLevel`: The log level for the autoscaling service. It is set to `Debug`, indicating that detailed debug logs will be generated.
 
 
-### 3.5) Build process
+### 3.5) Implementation details
 
 ### 3.5.1) Protocol buffers
 
